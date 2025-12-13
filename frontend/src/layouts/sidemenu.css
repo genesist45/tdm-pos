@@ -1,0 +1,11 @@
+.logo-small {
+    max-height: 100px;
+}
+
+.logo-medium {
+    max-height: 150px; 
+}
+
+.logo-large {
+    max-height: 200px;
+}
