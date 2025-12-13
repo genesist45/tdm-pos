@@ -1,0 +1,11 @@
+/* styles for light mode */
+body {
+  color: #000; /* Default text color */
+  background-color: #fff; /* Default background */
+}
+
+/* styles for dark mode */
+html.dark body {
+  color: #fff; /* White text in dark mode */
+  background-color: #1f2937; /* Dark background */
+}
