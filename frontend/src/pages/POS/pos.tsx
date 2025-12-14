@@ -5,6 +5,7 @@ import Sidemenu from "../../layouts/sidemenu";
 import Breadcrumb from "../../components/breadcrums";
 import { FaShoppingCart, FaTimes } from "react-icons/fa";
 import axios from "axios";
+import html2canvas from "html2canvas";
 
 // Define your interfaces here (Product, CartItem, Purchase)
 interface Product {
@@ -147,6 +148,23 @@ function PointOfSale() {
     const [discountPercent, setDiscountPercent] = useState<string>("");
     const [taxPercent, setTaxPercent] = useState<string>("");
 
+    // Receipt modal states
+    const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+    const [receiptData, setReceiptData] = useState<{
+        receiptNumber: string;
+        date: string;
+        items: { id: number; name: string; quantity: number; price: number }[];
+        subTotal: number;
+        discountPercent: string;
+        discountAmount: number;
+        taxPercent: string;
+        taxAmount: number;
+        totalAmount: number;
+        amountReceived: number;
+        change: number;
+    } | null>(null);
+    const receiptRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         // Authentication check
         if (!localStorage.getItem("adminToken")) {
@@ -247,6 +265,27 @@ function PointOfSale() {
                 console.log('Purchase response:', response.data);
 
                 if (response.status === 201) {
+                    // Save receipt data for modal
+                    setReceiptData({
+                        receiptNumber: response.data.purchase_id,
+                        date: new Date().toLocaleString(),
+                        items: cart.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            quantity: item.quantity,
+                            price: item.price
+                        })),
+                        subTotal: subTotal,
+                        discountPercent: discountPercent,
+                        discountAmount: discountAmount,
+                        taxPercent: taxPercent,
+                        taxAmount: taxAmount,
+                        totalAmount: totalAmount,
+                        amountReceived: parseFloat(amountReceived),
+                        change: changeAmount
+                    });
+                    setIsReceiptModalOpen(true);
+
                     // Check for low stock items
                     const lowStockItems = cart.filter(item => {
                         const product = products.find(p => p.id === item.id);
@@ -278,7 +317,8 @@ function PointOfSale() {
                     setCart([]);
                     setIsCartOpen(false);
                     setAmountReceived("");
-                    alert('Purchase completed successfully!');
+                    setDiscountPercent("");
+                    setTaxPercent("");
 
                     // Clear notifications after 5 seconds
                     setTimeout(() => {
@@ -332,6 +372,69 @@ function PointOfSale() {
 
     const handleAmountReceivedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAmountReceived(e.target.value);
+    };
+
+    // Print receipt function
+    const handlePrintReceipt = () => {
+        const printContent = receiptRef.current;
+        if (printContent) {
+            const printWindow = window.open('', '', 'height=600,width=400');
+            if (printWindow) {
+                printWindow.document.write('<html><head><title>Receipt - Troy-Dean MotorParts</title>');
+                printWindow.document.write('<style>');
+                printWindow.document.write(`
+                    body { font-family: 'Courier New', monospace; padding: 20px; margin: 0; }
+                    .receipt-container { max-width: 400px; margin: 0 auto; }
+                    .store-name { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 5px; }
+                    .store-address { text-align: center; font-size: 12px; margin-bottom: 15px; }
+                    .divider { border-top: 1px dashed #000; margin: 10px 0; }
+                    .receipt-info { display: flex; justify-content: space-between; font-size: 12px; margin: 5px 0; }
+                    .items-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
+                    .item-row { display: flex; justify-content: space-between; font-size: 12px; margin: 3px 0; }
+                    .item-row .name { flex: 2; }
+                    .item-row .qty { flex: 0.5; text-align: center; }
+                    .item-row .price { flex: 1; text-align: right; }
+                    .item-row .subtotal { flex: 1; text-align: right; }
+                    .totals { margin-top: 10px; }
+                    .total-row { display: flex; justify-content: space-between; font-size: 12px; margin: 3px 0; }
+                    .total-row.final { font-weight: bold; font-size: 14px; }
+                    .success-message { text-align: center; font-weight: bold; color: green; margin-top: 15px; font-size: 14px; }
+                    .thank-you { text-align: center; margin-top: 15px; font-size: 12px; }
+                `);
+                printWindow.document.write('</style></head><body>');
+                printWindow.document.write(printContent.innerHTML);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            }
+        }
+    };
+
+    // Download receipt as PNG function
+    const handleDownloadReceipt = async () => {
+        if (receiptRef.current) {
+            try {
+                const canvas = await html2canvas(receiptRef.current, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                });
+                const link = document.createElement('a');
+                link.download = `receipt-${receiptData?.receiptNumber || 'unknown'}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                console.error('Error generating receipt image:', error);
+                alert('Failed to download receipt. Please try again.');
+            }
+        }
+    };
+
+    // Close receipt modal
+    const handleCloseReceipt = () => {
+        setIsReceiptModalOpen(false);
+        setReceiptData(null);
     };
 
     // Function to detect if dark mode is active (example using body class)
@@ -588,6 +691,207 @@ function PointOfSale() {
             </div>
             {/* Purchase History (Initially Hidden or on a separate tab) */}
             {/* ... Purchase History Section ... */}
+
+            {/* Receipt Success Modal */}
+            {isReceiptModalOpen && receiptData && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10001,
+                        padding: '20px'
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            maxWidth: '450px',
+                            width: '100%',
+                            maxHeight: '90vh',
+                            overflow: 'auto',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                        }}
+                    >
+                        {/* Modal Header */}
+                        <div style={{
+                            backgroundColor: '#10b981',
+                            color: 'white',
+                            padding: '16px 20px',
+                            borderRadius: '12px 12px 0 0',
+                            textAlign: 'center'
+                        }}>
+                            <div style={{ fontSize: '24px', marginBottom: '4px' }}>✓</div>
+                            <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>Transaction Successful!</h2>
+                        </div>
+
+                        {/* Receipt Content */}
+                        <div ref={receiptRef} style={{ padding: '20px', backgroundColor: 'white' }}>
+                            <div className="receipt-container">
+                                {/* Store Header */}
+                                <div className="store-name" style={{ textAlign: 'center', fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>
+                                    Troy-Dean MotorParts
+                                </div>
+                                <div className="store-address" style={{ textAlign: 'center', fontSize: '11px', color: '#6b7280', marginBottom: '12px' }}>
+                                    Your Trusted Auto Parts Store
+                                </div>
+
+                                <div className="divider" style={{ borderTop: '1px dashed #d1d5db', margin: '12px 0' }}></div>
+
+                                {/* Receipt Info */}
+                                <div className="receipt-info" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px', color: '#374151' }}>
+                                    <span>Receipt No:</span>
+                                    <span style={{ fontWeight: '600' }}>{receiptData.receiptNumber}</span>
+                                </div>
+                                <div className="receipt-info" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px', color: '#374151' }}>
+                                    <span>Date:</span>
+                                    <span>{receiptData.date}</span>
+                                </div>
+
+                                <div className="divider" style={{ borderTop: '1px dashed #d1d5db', margin: '12px 0' }}></div>
+
+                                {/* Items Header */}
+                                <div className="items-header" style={{ display: 'flex', fontSize: '11px', fontWeight: '600', paddingBottom: '6px', borderBottom: '1px solid #e5e7eb', marginBottom: '8px', color: '#374151' }}>
+                                    <span style={{ flex: 2 }}>Item</span>
+                                    <span style={{ flex: 0.5, textAlign: 'center' }}>Qty</span>
+                                    <span style={{ flex: 1, textAlign: 'right' }}>Price</span>
+                                    <span style={{ flex: 1, textAlign: 'right' }}>Subtotal</span>
+                                </div>
+
+                                {/* Items List */}
+                                {receiptData.items.map((item, index) => (
+                                    <div key={index} className="item-row" style={{ display: 'flex', fontSize: '11px', marginBottom: '4px', color: '#4b5563' }}>
+                                        <span style={{ flex: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                                        <span style={{ flex: 0.5, textAlign: 'center' }}>{item.quantity}</span>
+                                        <span style={{ flex: 1, textAlign: 'right' }}>₱{item.price.toFixed(2)}</span>
+                                        <span style={{ flex: 1, textAlign: 'right' }}>₱{(item.price * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                ))}
+
+                                <div className="divider" style={{ borderTop: '1px dashed #d1d5db', margin: '12px 0' }}></div>
+
+                                {/* Totals */}
+                                <div className="totals">
+                                    <div className="total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px', color: '#374151' }}>
+                                        <span>Subtotal:</span>
+                                        <span>₱{receiptData.subTotal.toFixed(2)}</span>
+                                    </div>
+                                    {receiptData.discountPercent && parseFloat(receiptData.discountPercent) > 0 && (
+                                        <div className="total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px', color: '#ef4444' }}>
+                                            <span>Discount ({receiptData.discountPercent}%):</span>
+                                            <span>-₱{receiptData.discountAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    {receiptData.taxPercent && parseFloat(receiptData.taxPercent) > 0 && (
+                                        <div className="total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px', color: '#374151' }}>
+                                            <span>Tax ({receiptData.taxPercent}%):</span>
+                                            <span>+₱{receiptData.taxAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="divider" style={{ borderTop: '1px solid #374151', margin: '8px 0' }}></div>
+
+                                    <div className="total-row final" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>
+                                        <span>TOTAL:</span>
+                                        <span>₱{receiptData.totalAmount.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="divider" style={{ borderTop: '1px solid #374151', margin: '8px 0' }}></div>
+
+                                    <div className="total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px', color: '#374151' }}>
+                                        <span>Amount Received:</span>
+                                        <span>₱{receiptData.amountReceived.toFixed(2)}</span>
+                                    </div>
+                                    <div className="total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600', color: '#10b981' }}>
+                                        <span>Change:</span>
+                                        <span>₱{receiptData.change.toFixed(2)}</span>
+                                    </div>
+                                </div>
+
+                                <div className="divider" style={{ borderTop: '1px dashed #d1d5db', margin: '12px 0' }}></div>
+
+                                {/* Thank You Message */}
+                                <div className="thank-you" style={{ textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
+                                    Thank you for your purchase!
+                                    <br />
+                                    Please come again.
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div style={{ padding: '16px 20px', borderTop: '1px solid #e5e7eb', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <button
+                                onClick={handlePrintReceipt}
+                                style={{
+                                    flex: 1,
+                                    minWidth: '100px',
+                                    padding: '10px 16px',
+                                    backgroundColor: '#3b82f6',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: '600',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                🖨️ Print
+                            </button>
+                            <button
+                                onClick={handleDownloadReceipt}
+                                style={{
+                                    flex: 1,
+                                    minWidth: '100px',
+                                    padding: '10px 16px',
+                                    backgroundColor: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: '600',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                📥 Download PNG
+                            </button>
+                        </div>
+                        <div style={{ padding: '0 20px 16px 20px' }}>
+                            <button
+                                onClick={handleCloseReceipt}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 16px',
+                                    backgroundColor: '#6b7280',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: '600',
+                                    fontSize: '14px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
