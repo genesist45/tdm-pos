@@ -35,8 +35,10 @@ interface Purchase {
 }
 
 interface Category {
+    id: number;
     name: string;
-    image: string;
+    description: string | null;
+    image_path: string | null;
 }
 
 // Enhanced ProductCard Component
@@ -47,9 +49,8 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps & { cartQuantity?: number }> = ({ product, onAddToCart, cartQuantity }) => (
     <div
-        className={`border rounded-lg shadow-md p-4 text-center transition-transform transform hover:scale-105 ${
-            product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        className={`border rounded-lg shadow-md p-4 text-center transition-transform transform hover:scale-105 ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
     >
         <div className="relative">
             {product.image ? (
@@ -74,9 +75,8 @@ const ProductCard: React.FC<ProductCardProps & { cartQuantity?: number }> = ({ p
         <p className="text-gray-600 text-sm text-black">Price: ₱{product.price.toFixed(2)}</p>
         <p className="text-gray-500 text-xs text-black">Stock: {product.stock}</p>
         <button
-            className={`bg-blue-500 text-white py-2 px-4 rounded-md mt-2 w-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
-                product.stock === 0 ? 'bg-gray-400 cursor-not-allowed' : ''
-            }`}
+            className={`bg-blue-500 text-white py-2 px-4 rounded-md mt-2 w-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${product.stock === 0 ? 'bg-gray-400 cursor-not-allowed' : ''
+                }`}
             onClick={() => onAddToCart(product)}
             disabled={product.stock === 0}
         >
@@ -93,35 +93,36 @@ interface SidebarCartItemProps {
 }
 
 const SidebarCartItem: React.FC<SidebarCartItemProps> = ({ item, onQuantityChange, onRemoveFromCart }) => (
-    <div key={item.id} className="flex items-center py-3 border-b last:border-b-0">
-        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-md mr-4" />
+    <div key={item.id} className="flex items-center py-2 border-b last:border-b-0">
+        <img src={item.image} alt={item.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginRight: '8px' }} />
         <div className="flex-grow">
-            <h4 className="font-semibold text-sm text-black">{item.name}</h4>
-            <div className="flex items-center justify-between mt-1">
-                <div className="flex items-center border rounded-md text-xs">
+            <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#000', marginBottom: '2px' }}>{item.name}</h4>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center border rounded" style={{ fontSize: '10px' }}>
                     <button
-                        className="px-1 py-0.5 hover:bg-sky-200 focus:outline-none" /* Reduced padding */
+                        style={{ padding: '2px 6px', fontSize: '10px', backgroundColor: '#e0f2fe', borderRadius: '3px' }}
                         onClick={() => onQuantityChange(item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1}
-                        style={{ fontSize: '0.8rem', marginRight: '0.25rem' }} /* Smaller font size and right margin */
                     >
                         -
                     </button>
-                    <span className="w-8 text-center text-black">{item.quantity}</span>
+                    <span style={{ width: '24px', textAlign: 'center', fontSize: '11px', color: '#000' }}>{item.quantity}</span>
                     <button
-                        className="px-1 py-0.5 hover:bg-sky-200 focus:outline-none" /* Reduced padding */
+                        style={{ padding: '2px 6px', fontSize: '10px', backgroundColor: '#e0f2fe', borderRadius: '3px' }}
                         onClick={() => onQuantityChange(item.id, item.quantity + 1)}
                         disabled={item.quantity >= item.stock}
-                        style={{ fontSize: '0.8rem', marginLeft: '0.25rem' }} /* Smaller font size and left margin */
                     >
                         +
                     </button>
                 </div>
-                <span className="font-semibold text-sm text-black">₱{(item.price * item.quantity).toFixed(2)}</span>
+                <span style={{ fontSize: '11px', fontWeight: '600', color: '#000' }}>₱{(item.price * item.quantity).toFixed(2)}</span>
             </div>
         </div>
-        <button className="bg-sky-500 text-white w-8 h-8 flex items-center justify-center rounded-full focus:outline-none ml-2 text-xs hover:bg-sky-700" onClick={() => onRemoveFromCart(item.id)}>
-            <FaTimes className="w-4 h-4" />
+        <button
+            style={{ backgroundColor: '#0ea5e9', color: '#fff', width: '20px', height: '20px', borderRadius: '50%', marginLeft: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => onRemoveFromCart(item.id)}
+        >
+            <FaTimes style={{ width: '10px', height: '10px' }} />
         </button>
     </div>
 );
@@ -138,19 +139,13 @@ function PointOfSale() {
     const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [categories, setCategories] = useState<Category[]>([
-        { name: "Brake Parts", image: "/images/pos-system/brake_pads.png" },
-        { name: "Hoses Parts", image: "/images/pos-system/hoses.png" },
-        { name: "Electrical Parts", image: "/images/pos-system/electrical_parts_motorparts.png" },
-        { name: "Engine Parts", image: "/images/pos-system/engine_spare.png" },
-        { name: "Body Parts", image: "/images/pos-system/motor_sidemirror.png" },
-        { name: "Transmission Parts", image: "/images/pos-system/sprockets.png" },
-        { name: "Accessories Parts", image: "/images/pos-system/shock_absorber.png" },
-    ]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [amountReceived, setAmountReceived] = useState<string>("");
     const [change, setChange] = useState<number>(0);
     const productListRef = useRef<HTMLDivElement>(null);
     const [outOfStockNotification, setOutOfStockNotification] = useState<string[]>([]);
+    const [discountPercent, setDiscountPercent] = useState<string>("");
+    const [taxPercent, setTaxPercent] = useState<string>("");
 
     useEffect(() => {
         // Authentication check
@@ -188,6 +183,18 @@ function PointOfSale() {
         };
 
         fetchProducts();
+
+        // Fetch categories from API
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/categories');
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+
+        fetchCategories();
     }, [navigate]);
 
     useEffect(() => {
@@ -238,7 +245,7 @@ function PointOfSale() {
 
                 const response = await axios.post('http://localhost:8000/api/purchase-history', purchaseData);
                 console.log('Purchase response:', response.data);
-                
+
                 if (response.status === 201) {
                     // Check for low stock items
                     const lowStockItems = cart.filter(item => {
@@ -257,9 +264,9 @@ function PointOfSale() {
                                 console.log('Setting notification for low stock:', product.name);
                                 setOutOfStockNotification(prev => {
                                     // Prevent duplicate notifications for the same item in a single transaction
-                                    if (!prev.some(msg => msg.includes(`${product.name} is now low in stock!`))){
-                                         return [...prev, `${product.name} is now low in stock! (Stock: ${newStock})`];
-                                    } 
+                                    if (!prev.some(msg => msg.includes(`${product.name} is now low in stock!`))) {
+                                        return [...prev, `${product.name} is now low in stock! (Stock: ${newStock})`];
+                                    }
                                     return prev;
                                 });
                             }
@@ -313,25 +320,18 @@ function PointOfSale() {
 
     // --- Checkout Summary Calculations ---
     const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discountRate = 0; // 0%
-    const discount = subTotal * discountRate;
-    const deliveryCharges = 0; // Set to 0 for now
-    const serviceTaxRate = 0; // 0%
-    const serviceTax = (subTotal - discount) * serviceTaxRate;
-    const totalAmount = subTotal - discount + deliveryCharges + serviceTax;
+    const discountRate = discountPercent !== '' ? parseFloat(discountPercent) / 100 : 0;
+    const discountAmount = subTotal * discountRate;
+    const afterDiscount = subTotal - discountAmount;
+    const taxRate = taxPercent !== '' ? parseFloat(taxPercent) / 100 : 0;
+    const taxAmount = afterDiscount * taxRate;
+    const totalAmount = afterDiscount + taxAmount;
     const changeAmount = amountReceived !== '' ? Number(amountReceived) - totalAmount : 0;
     const isValidChange = amountReceived !== '' && Number(amountReceived) >= totalAmount;
     // --- End Checkout Summary Calculations ---
 
     const handleAmountReceivedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setAmountReceived(value);
-        if (value) {
-            const change = parseFloat(value) - total;
-            setChange(change >= 0 ? change : 0);
-        } else {
-            setChange(0);
-        }
+        setAmountReceived(e.target.value);
     };
 
     // Function to detect if dark mode is active (example using body class)
@@ -400,24 +400,29 @@ function PointOfSale() {
                     <div className="mt-4 sm:mt-8">
                         <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 text-left text-black">Categories</h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                            {categories.map((category) => (
-                                <button
-                                    key={category.name}
-                                    className={`bg-white border rounded-lg shadow-lg p-2 sm:p-4 text-center cursor-pointer ${
-                                        selectedCategory === category.name ? 'bg-sky-500 text-white' : 'text-black'
-                                    } ${isDarkModeActive() && category.name === "Brake Parts" ? 'text-black' : ''}
-                                       ${isDarkModeActive() && category.name === "Accessories Parts" ? 'text-black' : ''}
-                                    `}
-                                    onClick={() => handleCategoryClick(category.name)}
-                                >
-                                    <img src={category.image} alt={category.name} className="w-8 h-8 sm:w-12 sm:h-12 mx-auto object-cover rounded-md" />
-                                    <h3 className={`mt-1 sm:mt-2 text-xs sm:text-sm font-semibold ${
-                                        selectedCategory === category.name ? 'text-white' : 'text-black'
-                                    } ${isDarkModeActive() && category.name === "Brake Parts" ? 'text-black' : ''}
-                                       ${isDarkModeActive() && category.name === "Accessories Parts" ? 'text-black' : ''}
-                                    `}>{category.name}</h3>
-                                </button>
-                            ))}
+                            {categories.map((category) => {
+                                const imageUrl = category.image_path
+                                    ? (category.image_path.startsWith('http')
+                                        ? category.image_path
+                                        : `http://localhost:8000${category.image_path}`)
+                                    : '/images/pos-system/default_category.png';
+                                return (
+                                    <button
+                                        key={category.id}
+                                        className={`bg-white border rounded-lg shadow-lg p-2 sm:p-4 text-center cursor-pointer ${selectedCategory === category.name ? 'bg-sky-500 text-white' : 'text-black'
+                                            } ${isDarkModeActive() && category.name === "Brake Parts" ? 'text-black' : ''}
+                                           ${isDarkModeActive() && category.name === "Accessories Parts" ? 'text-black' : ''}
+                                        `}
+                                        onClick={() => handleCategoryClick(category.name)}
+                                    >
+                                        <img src={imageUrl} alt={category.name} className="w-8 h-8 sm:w-12 sm:h-12 mx-auto object-cover rounded-md" />
+                                        <h3 className={`mt-1 sm:mt-2 text-xs sm:text-sm font-semibold ${selectedCategory === category.name ? 'text-white' : 'text-black'
+                                            } ${isDarkModeActive() && category.name === "Brake Parts" ? 'text-black' : ''}
+                                           ${isDarkModeActive() && category.name === "Accessories Parts" ? 'text-black' : ''}
+                                        `}>{category.name}</h3>
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         <div className="mb-2 sm:mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -480,44 +485,99 @@ function PointOfSale() {
                     </div>
                 )}
                 {cart.length > 0 && (
-                    <div className="sticky bottom-0 bg-white p-2 sm:p-4 border-t text-black">
-                        <div className="py-1 sm:py-2 font-semibold text-base sm:text-lg space-y-1">
-                            <div className="flex justify-between font-bold text-xl mt-2">
-                                <span className="text-black">Total :</span>
-                                <span className="text-black">₱{totalAmount.toLocaleString()}</span>
+                    <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#fff', padding: '8px 12px', borderTop: '1px solid #e5e7eb' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '500', color: '#000' }}>
+                            {/* Subtotal */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <span>Subtotal:</span>
+                                <span style={{ fontWeight: '700' }}>₱{subTotal.toFixed(2)}</span>
                             </div>
-                        </div>
-                        {/* Amount Received Input and Change Display */}
-                        <div className="flex justify-between items-center mt-4">
-                            <label htmlFor="amountReceived" className="font-semibold text-black">Amount Received:</label>
-                            <input
-                                id="amountReceived"
-                                type="number"
-                                min={totalAmount}
-                                value={amountReceived}
-                                onChange={handleAmountReceivedChange}
-                                className="border rounded px-2 py-1 w-28 text-right text-black"
-                                placeholder="₱0"
-                            />
-                        </div>
-                        {amountReceived !== '' && (
-                            <div className="flex justify-between items-center mt-1">
-                                <span className="font-semibold text-black">Change:</span>
-                                <span className={`font-bold ${change >= 0 ? 'text-green-600' : 'text-red-600'} text-black`}>
-                                    ₱{change >= 0 ? change.toLocaleString() : change.toLocaleString()}
-                                </span>
+
+                            {/* Discount */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <span>Discount:</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ color: '#6b7280', fontSize: '10px' }}>%</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={discountPercent}
+                                        onChange={(e) => setDiscountPercent(e.target.value)}
+                                        style={{ border: '1px solid #d1d5db', borderRadius: '4px', padding: '2px 6px', width: '50px', textAlign: 'right', fontSize: '11px', color: '#000' }}
+                                        placeholder="0"
+                                    />
+                                </div>
                             </div>
-                        )}
-                        <div className="flex gap-2 mt-2">
+
+                            {/* Discount Amount */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <span>Discount Amount:</span>
+                                <span style={{ color: '#dc2626', fontWeight: '600' }}>-₱{discountAmount.toFixed(2)}</span>
+                            </div>
+
+                            {/* Tax */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <span>Tax (%):</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={taxPercent}
+                                    onChange={(e) => setTaxPercent(e.target.value)}
+                                    style={{ border: '1px solid #d1d5db', borderRadius: '4px', padding: '2px 6px', width: '50px', textAlign: 'right', fontSize: '11px', color: '#000' }}
+                                    placeholder="0"
+                                />
+                            </div>
+
+                            {/* Tax Amount */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <span style={{ fontStyle: 'italic' }}>Tax Amount:</span>
+                                <span style={{ color: '#2563eb', fontWeight: '600', fontStyle: 'italic' }}>+₱{taxAmount.toFixed(2)}</span>
+                            </div>
+
+                            {/* Total - highlighted */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', fontWeight: '700', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #d1d5db' }}>
+                                <span>Total:</span>
+                                <span>₱{totalAmount.toFixed(2)}</span>
+                            </div>
+
+                            {/* Amount Received */}
+                            <div className="flex justify-between items-center mt-2">
+                                <span className="text-black">Amount Received:</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={amountReceived}
+                                    onChange={handleAmountReceivedChange}
+                                    className="border rounded px-2 py-1 w-24 text-right text-black"
+                                    placeholder="₱0"
+                                />
+                            </div>
+
+                            {/* Change */}
+                            {amountReceived !== '' && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-black font-semibold">Change:</span>
+                                    <span className={`font-bold ${changeAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        ₱{changeAmount.toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-2 mt-3">
                             <button
-                                className={`bg-blue-200 text-blue-700 py-1 sm:py-2 rounded-md w-1/2 text-black`}
+                                className={`bg-blue-200 text-blue-700 py-1 sm:py-2 rounded-md w-1/2 font-semibold ${(cart.length === 0 || (amountReceived !== '' && Number(amountReceived) < totalAmount)) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                                 onClick={handleCheckout}
                                 disabled={cart.length === 0 || (amountReceived !== '' && Number(amountReceived) < totalAmount)}
                             >
                                 Buy
                             </button>
                             <button
-                                className="bg-blue-200 text-blue-700 py-1 sm:py-2 rounded-md w-1/2 text-black"
+                                className="bg-blue-200 text-blue-700 py-1 sm:py-2 rounded-md w-1/2 font-semibold"
                                 onClick={toggleCart}
                             >
                                 Continue Shopping

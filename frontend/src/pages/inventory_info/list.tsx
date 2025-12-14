@@ -21,6 +21,13 @@ interface InventoryItem {
     image_path: string;
 }
 
+interface Category {
+    id: number;
+    name: string;
+    description: string | null;
+    image_path: string | null;
+}
+
 const InventoryList: React.FC = () => {
     const gridRef = useRef<HTMLDivElement>(null);
     const gridInstance = useRef<Grid | null>(null);
@@ -33,9 +40,11 @@ const InventoryList: React.FC = () => {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [editForm, setEditForm] = useState({
         quantity: 0,
-        price: 0
+        price: 0,
+        category: ''
     });
     const [errors, setErrors] = useState({
         quantity: '',
@@ -98,7 +107,8 @@ const InventoryList: React.FC = () => {
             const updateData = {
                 ...selectedItem,
                 quantity: editForm.quantity,
-                price: editForm.price
+                price: editForm.price,
+                category: editForm.category
             };
 
             const response = await axios.patch(
@@ -153,7 +163,8 @@ const InventoryList: React.FC = () => {
         setSelectedItem(item);
         setEditForm({
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            category: item.category
         });
         setErrors({ quantity: '', price: '' });
         setIsModalOpen(true);
@@ -220,6 +231,19 @@ const InventoryList: React.FC = () => {
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
+
+    // Fetch categories on mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/categories');
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     useEffect(() => {
         const fetchInventory = async () => {
@@ -507,20 +531,26 @@ const InventoryList: React.FC = () => {
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Category</label>
-                                <input
-                                    type="text"
-                                    value={selectedItem.category}
-                                    disabled
+                                <select
+                                    value={editForm.category}
+                                    onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
                                         borderRadius: '6px',
                                         border: '1px solid #d1d5db',
-                                        backgroundColor: '#f3f4f6',
                                         fontSize: '14px',
-                                        boxSizing: 'border-box'
+                                        boxSizing: 'border-box' as const,
+                                        backgroundColor: '#ffffff'
                                     }}
-                                />
+                                >
+                                    <option value="">Select Category</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.name}>
+                                            {cat.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                         <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', gap: '16px' }}>
