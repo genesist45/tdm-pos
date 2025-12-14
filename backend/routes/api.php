@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PurchaseHistoryController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,9 @@ Route::apiResource('suppliers', SupplierController::class);
 
 // Inventory Routes
 Route::apiResource('inventory', InventoryController::class);
+
+// Category Routes
+Route::apiResource('categories', CategoryController::class);
 
 // Purchase History Routes
 Route::get('/purchase-history', [PurchaseHistoryController::class, 'index']);
