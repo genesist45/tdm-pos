@@ -16,6 +16,7 @@
     "@shadcn/ui": "^0.0.4",
     "axios": "^1.9.0",
     "gridjs": "^6.2.0",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.561.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
