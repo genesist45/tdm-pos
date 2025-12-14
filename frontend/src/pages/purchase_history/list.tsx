@@ -6,44 +6,50 @@ import Header from "../../layouts/header";
 import Sidemenu from "../../layouts/sidemenu";
 import axios from "axios";
 
-interface Purchase {
+interface TransactionItem {
+    id?: number;
+    name: string;
+    price?: number;
+    quantity: number;
+}
+
+interface Transaction {
     id: number;
-    purchase_id: string;
+    transaction_id: string;
+    type: 'purchase' | 'damage_return';
+    items: TransactionItem[];
+    item_name: string | null;
+    quantity: number | null;
     total_amount: number;
-    items: {
-        id: number;
-        name: string;
-        price: number;
-        quantity: number;
-    }[];
     amount_received: number;
     change: number;
+    reason: string | null;
+    processed_by: string | null;
     created_at: string;
 }
 
-const Purchase_History: React.FC = () => {
+const Transaction_History: React.FC = () => {
     const gridRef = useRef<HTMLDivElement>(null);
-    const [purchases, setPurchases] = useState<Purchase[]>([]);
-    const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     useEffect(() => {
-        const fetchPurchases = async () => {
+        const fetchTransactions = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/purchase-history');
-                console.log('Fetched purchases:', response.data); // Debug log
-                setPurchases(response.data);
+                console.log('Fetched transactions:', response.data);
+                setTransactions(response.data);
             } catch (error) {
-                console.error('Error fetching purchase history:', error);
+                console.error('Error fetching transaction history:', error);
             }
         };
 
-        fetchPurchases();
+        fetchTransactions();
     }, []);
 
     useEffect(() => {
-        if (gridRef.current && purchases.length > 0) {
-            console.log('Rendering grid with purchases:', purchases); // Debug log
+        if (gridRef.current && transactions.length > 0) {
             gridRef.current.innerHTML = "";
 
             const style = document.createElement('style');
@@ -54,21 +60,48 @@ const Purchase_History: React.FC = () => {
                 .main-content.app-content {
                     padding-top: 0 !important;
                 }
+                .type-badge-purchase {
+                    background-color: #10b981;
+                    color: white;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 10px;
+                    font-weight: 600;
+                }
+                .type-badge-damage {
+                    background-color: #ef4444;
+                    color: white;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 10px;
+                    font-weight: 600;
+                }
             `
             document.head.appendChild(style);
 
             new Grid({
                 columns: [
-                    { name: "#", width: "50px" },
-                    { name: "Purchase ID", width: "100px" },
+                    { name: "#", width: "40px" },
+                    {
+                        name: "Type",
+                        width: "100px",
+                        formatter: (cell) => {
+                            if (cell === 'purchase') {
+                                return html(`<span class="type-badge-purchase">Purchase</span>`);
+                            } else {
+                                return html(`<span class="type-badge-damage">Damage Return</span>`);
+                            }
+                        }
+                    },
+                    { name: "Transaction ID", width: "130px" },
                     {
                         name: "Items",
-                        width: "150px",
+                        width: "180px",
                         formatter: (_, row) => {
-                            const purchase = purchases.find((p) => p.purchase_id === row.cells[1].data);
-                            if (purchase && purchase.items) {
+                            const transaction = transactions.find((t) => t.transaction_id === row.cells[2].data);
+                            if (transaction && transaction.items && transaction.items.length > 0) {
                                 return html(
-                                    purchase.items.map((item) => 
+                                    transaction.items.map((item) =>
                                         `<div class="text-xs">${item.name} (${item.quantity}x)</div>`
                                     ).join("")
                                 );
@@ -76,24 +109,42 @@ const Purchase_History: React.FC = () => {
                             return html("<div>-</div>");
                         },
                     },
-                    { 
-                        name: "Total Amount", 
-                        width: "150px", 
-                        formatter: (cell) => `₱${Number(cell).toFixed(2)}` 
+                    {
+                        name: "Total Amount",
+                        width: "120px",
+                        formatter: (cell, row) => {
+                            const type = row.cells[1].data;
+                            if (type === 'damage_return') {
+                                return html(`<span class="text-red-500">N/A</span>`);
+                            }
+                            return `₱${Number(cell).toFixed(2)}`;
+                        }
                     },
-                    { 
-                        name: "Amount Received", 
-                        width: "180px", 
-                        formatter: (cell) => `₱${Number(cell).toFixed(2)}` 
+                    {
+                        name: "Amount Received",
+                        width: "130px",
+                        formatter: (cell, row) => {
+                            const type = row.cells[1].data;
+                            if (type === 'damage_return') {
+                                return html(`<span class="text-red-500">N/A</span>`);
+                            }
+                            return `₱${Number(cell).toFixed(2)}`;
+                        }
                     },
-                    { 
-                        name: "Change", 
-                        width: "120px", 
-                        formatter: (cell) => `₱${Number(cell).toFixed(2)}` 
+                    {
+                        name: "Change",
+                        width: "100px",
+                        formatter: (cell, row) => {
+                            const type = row.cells[1].data;
+                            if (type === 'damage_return') {
+                                return html(`<span class="text-red-500">N/A</span>`);
+                            }
+                            return `₱${Number(cell).toFixed(2)}`;
+                        }
                     },
-                    { 
-                        name: "Date", 
-                        width: "150px", 
+                    {
+                        name: "Date",
+                        width: "150px",
                         formatter: (cell) => {
                             try {
                                 return new Date(cell as string).toLocaleString();
@@ -102,16 +153,14 @@ const Purchase_History: React.FC = () => {
                             }
                         }
                     },
-                    
-                        
-                    
                 ],
                 pagination: { limit: 10 },
                 search: true,
                 sort: true,
-                data: purchases.map((row, index) => [
+                data: transactions.map((row, index) => [
                     (index + 1) + ".",
-                    row.purchase_id,
+                    row.type,
+                    row.transaction_id,
                     row.items,
                     row.total_amount,
                     row.amount_received,
@@ -120,51 +169,39 @@ const Purchase_History: React.FC = () => {
                 ]),
             }).render(gridRef.current);
 
-            window.viewPurchase = (id: string) => {
-                const purchase = purchases.find((p) => p.purchase_id === id);
-                if (purchase) {
-                    setSelectedPurchase(purchase);
+            (window as any).viewTransaction = (id: string) => {
+                const transaction = transactions.find((t) => t.transaction_id === id);
+                if (transaction) {
+                    setSelectedTransaction(transaction);
                     setIsViewModalOpen(true);
                 }
             };
-
-            window.deletePurchase = async (id: string) => {
-                if (window.confirm("Are you sure you want to delete this purchase?")) {
-                    try {
-                        await axios.delete(`http://localhost:8000/api/purchase-history/${id}`);
-                        setPurchases(purchases.filter((p) => p.purchase_id !== id));
-                    } catch (error) {
-                        console.error('Error deleting purchase:', error);
-                        alert('Error deleting purchase. Please try again.');
-                    }
-                }
-            };
         }
-    }, [purchases]);
+    }, [transactions]);
 
     const closeViewModal = () => {
         setIsViewModalOpen(false);
-        setSelectedPurchase(null);
+        setSelectedTransaction(null);
     };
 
     return (
         <>
-            <Header onLogout={() => {}} />
-            <Sidemenu onLogout={() => {}} />
+            <Header onLogout={() => { }} />
+            <Sidemenu onLogout={() => { }} />
             <div className="main-content app-content">
                 <div className="container-fluid">
                     <Breadcrumb
-                        title="Purchase History"
+                        title="Transaction History"
                         links={[{ text: "Dashboard", link: "/dashboard" }]}
-                        active="Purchase"
+                        active="Transaction"
                     />
                     <div className="grid grid-cols-12 gap-x-6">
                         <div className="xxl:col-span-12 col-span-12">
                             <div className="box overflow-hidden main-content-card">
                                 <div className="box-body p-5">
-                                    {purchases.length === 0 ? (
+                                    {transactions.length === 0 ? (
                                         <div className="text-center text-gray-500 py-4">
-                                            No purchase history found
+                                            No transaction history found
                                         </div>
                                     ) : (
                                         <div ref={gridRef}></div>
@@ -176,36 +213,103 @@ const Purchase_History: React.FC = () => {
                 </div>
             </div>
 
-            {isViewModalOpen && selectedPurchase && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-6 rounded-lg w-1/2">
-                        <h2 className="text-lg font-semibold mb-4">Purchase Details</h2>
-                        <p>
-                            <strong>Purchase ID:</strong> {selectedPurchase.purchase_id}
-                        </p>
-                        <p>
-                            <strong>Date:</strong> {new Date(selectedPurchase.created_at).toLocaleString()}
-                        </p>
-                        <p>
-                            <strong>Total Amount:</strong> ₱{selectedPurchase.total_amount.toFixed(2)}
-                        </p>
-                        <p>
-                            <strong>Amount Received:</strong> ₱{selectedPurchase.amount_received.toFixed(2)}
-                        </p>
-                        <p>
-                            <strong>Change:</strong> ₱{selectedPurchase.change.toFixed(2)}
-                        </p>
-                        <h3 className="font-semibold mt-4">Items:</h3>
-                        <ul className="mt-2">
-                            {selectedPurchase.items.map((item) => (
-                                <li key={item.id} className="text-sm mb-1">
-                                    {item.name} - Quantity: {item.quantity} - Price: ₱{(item.price * item.quantity).toFixed(2)}
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="mt-4 flex justify-end">
-                            <button 
-                                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500" 
+            {isViewModalOpen && selectedTransaction && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10000
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: 'white',
+                            padding: '24px',
+                            borderRadius: '12px',
+                            width: '500px',
+                            maxWidth: '90%',
+                            maxHeight: '90vh',
+                            overflow: 'auto'
+                        }}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
+                                {selectedTransaction.type === 'purchase' ? 'Purchase Details' : 'Damage Return Details'}
+                            </h2>
+                            <span
+                                style={{
+                                    backgroundColor: selectedTransaction.type === 'purchase' ? '#10b981' : '#ef4444',
+                                    color: 'white',
+                                    padding: '4px 12px',
+                                    borderRadius: '12px',
+                                    fontSize: '12px',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                {selectedTransaction.type === 'purchase' ? 'Purchase' : 'Damage Return'}
+                            </span>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div>
+                                <strong>Transaction ID:</strong> {selectedTransaction.transaction_id}
+                            </div>
+                            <div>
+                                <strong>Date:</strong> {new Date(selectedTransaction.created_at).toLocaleString()}
+                            </div>
+
+                            {selectedTransaction.type === 'purchase' && (
+                                <>
+                                    <div>
+                                        <strong>Total Amount:</strong> ₱{selectedTransaction.total_amount.toFixed(2)}
+                                    </div>
+                                    <div>
+                                        <strong>Amount Received:</strong> ₱{selectedTransaction.amount_received.toFixed(2)}
+                                    </div>
+                                    <div>
+                                        <strong>Change:</strong> ₱{selectedTransaction.change.toFixed(2)}
+                                    </div>
+                                </>
+                            )}
+
+                            {selectedTransaction.type === 'damage_return' && (
+                                <>
+                                    <div>
+                                        <strong>Reason:</strong> {selectedTransaction.reason}
+                                    </div>
+                                    <div>
+                                        <strong>Processed By:</strong> {selectedTransaction.processed_by}
+                                    </div>
+                                </>
+                            )}
+
+                            <div>
+                                <h3 style={{ fontWeight: '600', marginTop: '8px' }}>Items:</h3>
+                                <ul style={{ marginTop: '8px' }}>
+                                    {selectedTransaction.items.map((item, index) => (
+                                        <li key={index} style={{ fontSize: '14px', marginBottom: '4px' }}>
+                                            {item.name} - Quantity: {item.quantity}
+                                            {item.price && selectedTransaction.type === 'purchase' && ` - Price: ₱${(item.price * item.quantity).toFixed(2)}`}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                                style={{
+                                    backgroundColor: '#9ca3af',
+                                    color: 'white',
+                                    padding: '8px 16px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    cursor: 'pointer'
+                                }}
                                 onClick={closeViewModal}
                             >
                                 Close
@@ -218,11 +322,4 @@ const Purchase_History: React.FC = () => {
     );
 };
 
-export default Purchase_History;
-
-declare global {
-    interface Window {
-        viewPurchase: (id: string) => void;
-        deletePurchase: (id: string) => void;
-    }
-}
+export default Transaction_History;

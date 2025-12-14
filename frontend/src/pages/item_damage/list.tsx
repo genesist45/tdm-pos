@@ -78,7 +78,8 @@ const ItemDamage_List: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (gridRef.current && !loading) {
+        if (gridRef.current && !loading && damagedItems.length > 0) {
+            console.log('Rendering grid with data:', damagedItems);
             gridRef.current.innerHTML = '';
 
             gridInstance.current = new Grid({
@@ -93,32 +94,34 @@ const ItemDamage_List: React.FC = () => {
                     {
                         name: "Actions",
                         width: "150px",
-                        formatter: (_, row) =>
-                            html(`
+                        formatter: (cell) => {
+                            const id = cell;
+                            return html(`
                                 <div class="flex justify-center gap-2">
                                     <button 
                                         class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded transition-all duration-200"
-                                        onclick="window.viewDamagedItem(${row.cells[0].data})"
+                                        onclick="window.viewDamagedItem(${id})"
                                         title="View"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                     </button>
                                     <button 
                                         class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded transition-all duration-200"
-                                        onclick="window.editDamagedItem(${row.cells[0].data})"
+                                        onclick="window.editDamagedItem(${id})"
                                         title="Edit"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
                                     </button>
                                     <button 
                                         class="bg-red-500 hover:bg-red-600 text-white p-2 rounded transition-all duration-200"
-                                        onclick="window.deleteDamagedItem(${row.cells[0].data})"
+                                        onclick="window.deleteDamagedItem(${id})"
                                         title="Delete"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                     </button>
                                 </div>
-                            `),
+                            `);
+                        }
                     },
                 ],
                 pagination: { limit: 10 },
@@ -126,12 +129,13 @@ const ItemDamage_List: React.FC = () => {
                 sort: true,
                 data: damagedItems.map((item) => [
                     item.id,
-                    item.invoice_no,
-                    item.item_name,
-                    item.quantity_returned,
-                    item.return_reason,
-                    new Date(item.return_date).toLocaleDateString(),
-                    item.processed_by
+                    item.invoice_no || '',
+                    item.item_name || '',
+                    item.quantity_returned || 0,
+                    item.return_reason || '',
+                    item.return_date ? new Date(item.return_date).toLocaleDateString() : '',
+                    item.processed_by || '',
+                    item.id  // This is for the Actions column
                 ]),
             });
 
@@ -487,6 +491,8 @@ const ItemDamage_List: React.FC = () => {
                             <div className="box overflow-hidden main-content-card">
                                 {loading ? (
                                     <div className="p-5 text-center">Loading...</div>
+                                ) : damagedItems.length === 0 ? (
+                                    <div className="p-5 text-center text-gray-500">No damaged item records found</div>
                                 ) : (
                                     <div ref={gridRef} className="box-body p-5" />
                                 )}

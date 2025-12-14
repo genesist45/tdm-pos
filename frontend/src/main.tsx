@@ -7,8 +7,8 @@ import Dashboard from './pages/dashboard.tsx';
 import AdminLoginPage from './pages/AdminLogin.tsx';
 import PointOfSale from './pages/POS/pos.tsx';
 
-// Purchase Pages
-import Sales_List from './pages/purchase_history/list.tsx';
+// Transaction History Page
+import Transaction_History from './pages/purchase_history/list.tsx';
 
 // Supplier Pages
 import Supplier_List from './pages/supplier/list.tsx';
@@ -50,8 +50,8 @@ createRoot(document.getElementById('root')!).render(
           element={isAuthenticated() ? <Dashboard /> : <Navigate to="/admin" />}
         />
 
-        {/* Sales Routes (Protected) */}
-        <Route path="/sales" element={isAuthenticated() ? <Sales_List /> : <Navigate to="/admin" />} />
+        {/* Transaction History Route (Protected) */}
+        <Route path="/sales" element={isAuthenticated() ? <Transaction_History /> : <Navigate to="/admin" />} />
 
         {/* Supplier Routes (Protected) */}
         <Route path="/supplier" element={isAuthenticated() ? <Supplier_List /> : <Navigate to="/admin" />} />
