@@ -1,6 +1,6 @@
 /* SalesReport.css */
 .sales-report-page {
-  padding: 20px;
+  padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f7f9fc;
   min-height: 100vh;
@@ -9,7 +9,7 @@
 }
 
 .sales-report-page .main-content-wrapper {
-  padding: 30px;
+  padding: 0;
   flex-grow: 1;
   display: flex;
   flex-direction: column;

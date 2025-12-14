@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./assets/css/style.css";
 import Dashboard from "./pages/dashboard.tsx";
 import AdminLoginPage from "./pages/AdminLogin.tsx";
+import AdminRoute from "./components/AdminRoute.tsx";
 import PointOfSale from "./pages/POS/pos.tsx";
 
 // Transaction History Page
@@ -28,10 +29,7 @@ import ItemDamage_Edit from "./pages/item_damage/edit.tsx";
 // Import SalesReport
 import SalesReport from "./pages/SalesReport/SalesReport.tsx";
 
-// Function to check if the user is authenticated
-const isAuthenticated = () => {
-  return localStorage.getItem("adminToken") !== null;
-};
+
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -43,91 +41,33 @@ createRoot(document.getElementById("root")!).render(
         {/* Admin Login Route */}
         <Route path="/admin" element={<AdminLoginPage />} />
 
-        {/* Dashboard (Protected) */}
-        <Route
-          path="/dashboard"
-          element={isAuthenticated() ? <Dashboard /> : <Navigate to="/admin" />}
-        />
+        {/* Protected Routes */}
+        <Route element={<AdminRoute />}>
+          {/* Dashboard */}
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Transaction History Route (Protected) */}
-        <Route
-          path="/sales"
-          element={
-            isAuthenticated() ? (
-              <Transaction_History />
-            ) : (
-              <Navigate to="/admin" />
-            )
-          }
-        />
+          {/* Transaction History */}
+          <Route path="/sales" element={<Transaction_History />} />
 
-        {/* Inventory Routes (Protected) */}
-        <Route
-          path="/inventory"
-          element={
-            isAuthenticated() ? <Inventory_List /> : <Navigate to="/admin" />
-          }
-        />
-        <Route
-          path="/inventory/create"
-          element={
-            isAuthenticated() ? (
-              <Inventory_Registration />
-            ) : (
-              <Navigate to="/admin" />
-            )
-          }
-        />
-        <Route
-          path="/inventory/edit/:id"
-          element={
-            isAuthenticated() ? <Inventory_Edit /> : <Navigate to="/admin" />
-          }
-        />
+          {/* Inventory Routes */}
+          <Route path="/inventory" element={<Inventory_List />} />
+          <Route path="/inventory/create" element={<Inventory_Registration />} />
+          <Route path="/inventory/edit/:id" element={<Inventory_Edit />} />
 
-        {/* Categories Route (Protected) */}
-        <Route
-          path="/categories"
-          element={
-            isAuthenticated() ? <Categories_List /> : <Navigate to="/admin" />
-          }
-        />
+          {/* Categories Route */}
+          <Route path="/categories" element={<Categories_List />} />
 
-        {/* POS Route (Protected) */}
-        <Route
-          path="/pos"
-          element={
-            isAuthenticated() ? <PointOfSale /> : <Navigate to="/admin" />
-          }
-        />
+          {/* POS Route */}
+          <Route path="/pos" element={<PointOfSale />} />
 
-        {/* Sales Report Route (Protected) */}
-        <Route
-          path="/sales-report"
-          element={
-            isAuthenticated() ? <SalesReport /> : <Navigate to="/admin" />
-          }
-        />
+          {/* Sales Report Route */}
+          <Route path="/sales-report" element={<SalesReport />} />
 
-        {/* Item Damage Routes (Protected) */}
-        <Route
-          path="/item-damage"
-          element={
-            isAuthenticated() ? <ItemDamage_List /> : <Navigate to="/admin" />
-          }
-        />
-        <Route
-          path="/item-damage/add"
-          element={
-            isAuthenticated() ? <ItemDamage_Add /> : <Navigate to="/admin" />
-          }
-        />
-        <Route
-          path="/item-damage/edit/:id"
-          element={
-            isAuthenticated() ? <ItemDamage_Edit /> : <Navigate to="/admin" />
-          }
-        />
+          {/* Item Damage Routes */}
+          <Route path="/item-damage" element={<ItemDamage_List />} />
+          <Route path="/item-damage/add" element={<ItemDamage_Add />} />
+          <Route path="/item-damage/edit/:id" element={<ItemDamage_Edit />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>,

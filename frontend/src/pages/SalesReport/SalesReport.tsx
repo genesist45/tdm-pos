@@ -93,17 +93,17 @@ const groupSalesByMonth = (data: SalesData[]): ProcessedSalesData[] => {
 
 const groupSalesByFifteenDays = (data: SalesData[]): ProcessedSalesData[] => {
     const fifteenDaySales: { [period: string]: { total: number; count: number; orders: number[] } } = {};
-    
+
     data.forEach((sale) => {
         const date = new Date(sale.date);
         const day = date.getDate();
         const month = date.getMonth();
         const year = date.getFullYear();
-        
+
         // Determine which 15-day period this sale belongs to
         const period = day <= 15 ? '1-15' : '16-31';
         const periodKey = `${year}-${month + 1}-${period}`;
-        
+
         fifteenDaySales[periodKey] = fifteenDaySales[periodKey] || { total: 0, count: 0, orders: [] };
         fifteenDaySales[periodKey].total += sale.totalAmount;
         fifteenDaySales[periodKey].count += sale.transactions || 1;
@@ -333,8 +333,8 @@ function SalesReport() {
                                 <div className="table-section bg-white p-6 shadow-lg rounded-lg mt-6 dark:bg-gray-800">
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="table-title text-gray-800 dark:text-white">Sales Details</h3>
-                                        <button 
-                                            onClick={() => window.print()} 
+                                        <button
+                                            onClick={() => window.print()}
                                             className="print-button"
                                             title="Print Report"
                                         >

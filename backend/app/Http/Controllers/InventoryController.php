@@ -30,6 +30,13 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
+        // Convert string 'true'/'false' to boolean BEFORE validation
+        if ($request->has('is_active') && is_string($request->input('is_active'))) {
+            $request->merge([
+                'is_active' => filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN)
+            ]);
+        }
+
         $request->validate([
             'product_name' => 'required|string',
             'category' => 'required|string',
@@ -37,7 +44,7 @@ class InventoryController extends Controller
             'price' => 'required|numeric|min:0',
             'stock_status' => 'required|string',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'is_active' => 'nullable|boolean'
         ]);
 

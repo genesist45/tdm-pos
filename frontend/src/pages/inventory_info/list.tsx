@@ -131,27 +131,9 @@ const InventoryList: React.FC = () => {
         const inventoryResponse = await axios.get(
           "http://localhost:8000/api/inventory",
         );
-        const inventoryData = inventoryResponse.data.map(
-          (item: InventoryItem) => [
-            item.id,
-            item.product_name,
-            item.category,
-            item.quantity,
-            item.price,
-            item.image_path ? `http://localhost:8000${item.image_path}` : null,
-          ],
-        );
 
-        if (gridInstance.current) {
-          gridInstance.current
-            .updateConfig({
-              data: inventoryData.map((item: any[], index: number) => [
-                item[0],
-                ...item.slice(1),
-              ]),
-            })
-            .forceRender();
-        }
+        setInventoryData(inventoryResponse.data);
+        initGrid(inventoryResponse.data);
 
         setIsModalOpen(false);
         setErrors({ quantity: "", price: "" });
@@ -211,14 +193,10 @@ const InventoryList: React.FC = () => {
         `http://localhost:8000/api/inventory/${selectedItem.id}`,
       );
 
-      // Update local state
-      const updatedData = inventoryData.filter(
-        (item) => item.id !== selectedItem.id,
-      );
-      setInventoryData(updatedData);
-
-      // Refresh grid
-      refreshGrid(updatedData);
+      // Refresh data from server to ensure sync
+      const response = await axios.get("http://localhost:8000/api/inventory");
+      setInventoryData(response.data);
+      initGrid(response.data);
 
       setIsDeleteModalOpen(false);
       setSelectedItem(null);
@@ -269,130 +247,143 @@ const InventoryList: React.FC = () => {
     fetchCategories();
   }, []);
 
+  const initGrid = (data: InventoryItem[]) => {
+    if (gridInstance.current) {
+      gridInstance.current.destroy();
+      gridInstance.current = null;
+    }
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+
+    if (gridRef.current) {
+      gridRef.current.innerHTML = "";
+
+      const gridFormattedData = data.map((item: InventoryItem) => [
+        item.id,
+        item.product_name,
+        item.category,
+        item.quantity,
+        item.price,
+        item.image_path ? `http://localhost:8000${item.image_path}` : null,
+      ]);
+
+      gridInstance.current = new Grid({
+        columns: [
+          { name: "#", width: "10px" },
+          { name: "Part Name", width: "100px" },
+          { name: "Category", width: "100px" },
+          {
+            name: "Quantity",
+            width: "60px",
+            formatter: (cell: any) => {
+              const quantity = Number(cell);
+              return html(`
+                                    <div style="color: ${quantity === 0 ? "#dc2626" : "inherit"
+                }; font-weight: ${quantity === 0 ? "bold" : "normal"
+                }">
+                                        ${quantity}
+                                    </div>
+                                `);
+            },
+          },
+          { name: "Price", width: "70px" },
+          {
+            name: "Image",
+            width: "100px",
+            formatter: (cell) =>
+              cell
+                ? html(
+                  `<img src="${cell}" alt="Motor Part" style="width: 150px; height: 150px; object-fit: cover; border-radius: 5px;" />`,
+                )
+                : html('<div class="w-20 h-20 bg-gray-200"></div>'),
+          },
+          {
+            name: "Actions",
+            width: "120px",
+            formatter: (_, row) =>
+              html(`
+                                    <div class="flex justify-center gap-2">
+                                        <button
+                                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded transition-all duration-200 flex items-center justify-center"
+                                            onclick="window.openViewModal(${row.cells[0].data})"
+                                            title="View Details"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded transition-all duration-200 flex items-center justify-center"
+                                            onclick="window.navigateToEdit(${row.cells[0].data})"
+                                            title="Edit Item"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                                                <path d="m15 5 4 4"></path>
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="bg-red-500 hover:bg-red-600 text-white p-2 rounded transition-all duration-200 flex items-center justify-center"
+                                            onclick="window.openDeleteModal(${row.cells[0].data})"
+                                            title="Delete Item"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                <line x1="10" x2="10" y1="11" y2="17"></line>
+                                                <line x1="14" x2="14" y1="11" y2="17"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                `),
+          },
+        ],
+        pagination: { limit: 10 },
+        search: true,
+        sort: true,
+        data: gridFormattedData,
+      }).render(gridRef.current);
+
+      // Add global functions for the grid to use
+      (window as any).navigateToEdit = (id: number) => {
+        window.location.href = `/inventory/edit/${id}`;
+      };
+
+      (window as any).openViewModal = (id: number) => {
+        openViewModal(id);
+      };
+
+      (window as any).openDeleteModal = (id: number) => {
+        const item = data.find((i: InventoryItem) => i.id === id); // Use fresh data closure
+        if (item) {
+          openDeleteModal(item);
+        }
+      };
+
+      // Set up MutationObserver
+      const tableBody = gridRef.current.querySelector("tbody");
+      if (tableBody) {
+        observerRef.current = new MutationObserver(() => {
+          scrollToTop();
+        });
+        observerRef.current.observe(tableBody, {
+          childList: true,
+          subtree: true,
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchInventory = async () => {
       try {
         const response = await axios.get("http://localhost:8000/api/inventory");
-        const gridFormattedData = response.data.map((item: InventoryItem) => [
-          item.id,
-          item.product_name,
-          item.category,
-          item.quantity,
-          item.price,
-          item.image_path ? `http://localhost:8000${item.image_path}` : null,
-        ]);
-
-        if (gridRef.current) {
-          gridRef.current.innerHTML = "";
-
-          gridInstance.current = new Grid({
-            columns: [
-              { name: "#", width: "10px" },
-              { name: "Part Name", width: "100px" },
-              { name: "Category", width: "100px" },
-              {
-                name: "Quantity",
-                width: "60px",
-                formatter: (cell: any) => {
-                  const quantity = Number(cell);
-                  return html(`
-                                        <div style="color: ${quantity === 0 ? "#dc2626" : "inherit"}; font-weight: ${quantity === 0 ? "bold" : "normal"}">
-                                            ${quantity}
-                                        </div>
-                                    `);
-                },
-              },
-              { name: "Price", width: "70px" },
-              {
-                name: "Image",
-                width: "100px",
-                formatter: (cell) =>
-                  cell
-                    ? html(
-                        `<img src="${cell}" alt="Motor Part" style="width: 150px; height: 150px; object-fit: cover; border-radius: 5px;" />`,
-                      )
-                    : html('<div class="w-20 h-20 bg-gray-200"></div>'),
-              },
-              {
-                name: "Actions",
-                width: "120px",
-                formatter: (_, row) =>
-                  html(`
-                                        <div class="flex justify-center gap-2">
-                                            <button
-                                                class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded transition-all duration-200 flex items-center justify-center"
-                                                onclick="window.openViewModal(${row.cells[0].data})"
-                                                title="View Details"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                            <button
-                                                class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded transition-all duration-200 flex items-center justify-center"
-                                                onclick="window.navigateToEdit(${row.cells[0].data})"
-                                                title="Edit Item"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                                                    <path d="m15 5 4 4"></path>
-                                                </svg>
-                                            </button>
-                                            <button
-                                                class="bg-red-500 hover:bg-red-600 text-white p-2 rounded transition-all duration-200 flex items-center justify-center"
-                                                onclick="window.openDeleteModal(${row.cells[0].data})"
-                                                title="Delete Item"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M3 6h18"></path>
-                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                                    <line x1="10" x2="10" y1="11" y2="17"></line>
-                                                    <line x1="14" x2="14" y1="11" y2="17"></line>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    `),
-              },
-            ],
-            pagination: { limit: 10 },
-            search: true,
-            sort: true,
-            data: gridFormattedData,
-          }).render(gridRef.current);
-
-          // Store inventory data for modal operations
-          setInventoryData(response.data);
-
-          // Add global functions for the grid to use
-          (window as any).navigateToEdit = (id: number) => {
-            window.location.href = `/inventory/edit/${id}`;
-          };
-
-          (window as any).openViewModal = (id: number) => {
-            openViewModal(id);
-          };
-
-          (window as any).openDeleteModal = (id: number) => {
-            const item = response.data.find((i: InventoryItem) => i.id === id);
-            if (item) {
-              openDeleteModal(item);
-            }
-          };
-
-          // Set up MutationObserver
-          const tableBody = gridRef.current.querySelector("tbody");
-          if (tableBody) {
-            observerRef.current = new MutationObserver(() => {
-              scrollToTop();
-            });
-            observerRef.current.observe(tableBody, {
-              childList: true,
-              subtree: true,
-            });
-          }
-        }
+        setInventoryData(response.data);
+        initGrid(response.data);
         setLoading(false);
       } catch (err: any) {
         setError(
@@ -412,18 +403,17 @@ const InventoryList: React.FC = () => {
 
   return (
     <>
-      <Header onLogout={() => {}} />
-      <Sidemenu onLogout={() => {}} />
+      <Header onLogout={() => { }} />
+      <Sidemenu onLogout={() => { }} />
       <div className="main-content app-content">
         {/* Success/Error Popup Modal */}
         {notification.show && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
             <div
-              className={`bg-white rounded-lg p-6 shadow-xl transform transition-all duration-300 ${
-                notification.type === "success"
-                  ? "border-2 border-green-500"
-                  : "border-2 border-red-500"
-              }`}
+              className={`bg-white rounded-lg p-6 shadow-xl transform transition-all duration-300 ${notification.type === "success"
+                ? "border-2 border-green-500"
+                : "border-2 border-red-500"
+                }`}
             >
               <div className="flex items-center justify-center mb-4">
                 {notification.type === "success" ? (
@@ -461,11 +451,10 @@ const InventoryList: React.FC = () => {
                 )}
               </div>
               <p
-                className={`text-center text-lg font-medium ${
-                  notification.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+                className={`text-center text-lg font-medium ${notification.type === "success"
+                  ? "text-green-600"
+                  : "text-red-600"
+                  }`}
               >
                 {notification.message}
               </p>

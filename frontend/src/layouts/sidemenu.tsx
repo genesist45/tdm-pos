@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 interface SidemenuProps {
@@ -69,8 +69,8 @@ function Sidemenu({ onLogout }: SidemenuProps) {
                 <Link
                   to={item.to}
                   className={`side-menu__item ${activeMenu === item.to
-                      ? "bg-blue-200 text-blue-700 font-bold"
-                      : "text-gray-700"
+                    ? "bg-blue-200 text-blue-700 font-bold"
+                    : "text-gray-700"
                     }`}
                   onClick={() => handleMenuClick(item.to)}
                 >
