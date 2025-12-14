@@ -44,7 +44,7 @@ function Sidemenu({ onLogout }: SidemenuProps) {
             {[
               { to: "/dashboard", icon: "bi-speedometer", label: "Dashboard" },
               { to: "/pos", icon: "bi-cash-coin", label: "Buy/Purchase" },
-              { to: "/sales", icon: "bi-cart-fill", label: "Purchase History" },
+              { to: "/sales", icon: "bi-cart-fill", label: "Transaction History" },
               { to: "/inventory", icon: "bi-box-seam", label: "Manage Inventory" },
               { to: "/categories", icon: "bi-tags", label: "Categories" },
               { to: "/item-damage", icon: "bi-exclamation-triangle", label: "Item Damage" },
