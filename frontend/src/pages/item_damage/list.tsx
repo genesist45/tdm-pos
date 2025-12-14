@@ -6,14 +6,14 @@ import Breadcrumb from "../../components/breadcrums";
 import Header from "../../layouts/header";
 import Sidemenu from "../../layouts/sidemenu";
 import axios from "axios";
-import { X, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 interface DamagedItem {
   id: number;
   invoice_no: string;
   item_id: number | null;
   item_name: string;
-  item_price: number | null;
+  item_price: number | string | null;
   quantity_returned: number;
   return_type: string;
   return_reason: string;
@@ -209,8 +209,8 @@ const ItemDamage_List: React.FC = () => {
 
   return (
     <>
-      <Header onLogout={() => {}} />
-      <Sidemenu onLogout={() => {}} />
+      <Header onLogout={() => { }} />
+      <Sidemenu onLogout={() => { }} />
       <div className="main-content app-content">
         {/* Notification Toast */}
         {notification.show && (
@@ -313,21 +313,7 @@ const ItemDamage_List: React.FC = () => {
               >
                 Item Return Details
               </h2>
-              <button
-                onClick={() => {
-                  setIsViewModalOpen(false);
-                  setSelectedItem(null);
-                }}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "4px",
-                  color: "#6b7280",
-                }}
-              >
-                <X size={20} />
-              </button>
+
             </div>
             <div style={{ display: "grid", gap: "12px" }}>
               <div>
@@ -340,17 +326,17 @@ const ItemDamage_List: React.FC = () => {
                 <strong>Quantity Returned:</strong>{" "}
                 {selectedItem.quantity_returned}
               </div>
-              {selectedItem.item_price && (
+              {selectedItem.item_price !== null && (
                 <div>
                   <strong>Item Price:</strong> ₱
-                  {selectedItem.item_price.toFixed(2)}
+                  {Number(selectedItem.item_price).toFixed(2)}
                 </div>
               )}
-              {selectedItem.item_price && (
+              {selectedItem.item_price !== null && (
                 <div>
                   <strong>Total Value:</strong> ₱
                   {(
-                    selectedItem.item_price * selectedItem.quantity_returned
+                    Number(selectedItem.item_price) * selectedItem.quantity_returned
                   ).toFixed(2)}
                 </div>
               )}

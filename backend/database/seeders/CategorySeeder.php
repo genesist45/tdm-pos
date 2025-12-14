@@ -15,37 +15,37 @@ class CategorySeeder extends Seeder
         $categories = [
             [
                 'name' => 'Brake Parts',
-                'image_path' => '/images/pos-system/brake_pads.png',
+                'image_path' => '/images/inventory/brake_pads.png',
                 'description' => 'Brake pads, discs, and related components'
             ],
             [
                 'name' => 'Hoses Parts',
-                'image_path' => '/images/pos-system/hoses.png',
+                'image_path' => '/images/inventory/hoses.png',
                 'description' => 'Hoses and tubing for various applications'
             ],
             [
                 'name' => 'Electrical Parts',
-                'image_path' => '/images/pos-system/electrical_parts_motorparts.png',
+                'image_path' => '/images/inventory/electrical_parts_motorparts.png',
                 'description' => 'Electrical components and wiring'
             ],
             [
                 'name' => 'Engine Parts',
-                'image_path' => '/images/pos-system/engine_spare.png',
+                'image_path' => '/images/inventory/engine_spare.png',
                 'description' => 'Engine components and spare parts'
             ],
             [
                 'name' => 'Body Parts',
-                'image_path' => '/images/pos-system/motor_sidemirror.png',
+                'image_path' => '/images/inventory/motor_sidemirror.png',
                 'description' => 'Body panels and exterior components'
             ],
             [
                 'name' => 'Transmission Parts',
-                'image_path' => '/images/pos-system/sprockets.png',
+                'image_path' => '/images/inventory/sprockets.png',
                 'description' => 'Transmission and drivetrain components'
             ],
             [
                 'name' => 'Accessories Parts',
-                'image_path' => '/images/pos-system/shock_absorber.png',
+                'image_path' => '/images/inventory/shock_absorber.png',
                 'description' => 'Accessories and add-on parts'
             ],
         ];

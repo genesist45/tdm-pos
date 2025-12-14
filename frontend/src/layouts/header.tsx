@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { RiMenuLine, RiNotificationLine, RiSettingsLine, RiUserLine } from 'react-icons/ri';
+import { RiNotificationLine, RiUserLine } from 'react-icons/ri';
 import Avatar from '/src/assets/images/faces/14.jpg';
 import axios from 'axios';
 
@@ -101,7 +101,7 @@ function Header({ onLogout }: HeaderProps) {
                                 color: "black",
                             }} />
                             {lowStockItems.length > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-10 h-5 flex items-center justify-center">
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center leading-none">
                                     {lowStockItems.length}
                                 </span>
                             )}
