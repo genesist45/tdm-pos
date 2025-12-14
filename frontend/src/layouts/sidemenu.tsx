@@ -46,17 +46,17 @@ function Sidemenu({ onLogout }: SidemenuProps) {
               { to: "/pos", icon: "bi-cash-coin", label: "Buy/Purchase" },
               { to: "/sales", icon: "bi-cart-fill", label: "Purchase History" },
               { to: "/inventory", icon: "bi-box-seam", label: "Manage Inventory" },
+              { to: "/categories", icon: "bi-tags", label: "Categories" },
               { to: "/supplier", icon: "bi-truck", label: "Manage Suppliers" },
               { to: "/sales-report", icon: "bi-bar-chart-line", label: "Sales Report" }, // Added Sales Report
             ].map((item) => (
               <li key={item.to} className="slide">
                 <Link
                   to={item.to}
-                  className={`side-menu__item ${
-                    activeMenu === item.to
+                  className={`side-menu__item ${activeMenu === item.to
                       ? "bg-blue-200 text-blue-700 font-bold"
                       : "text-gray-700"
-                  }`}
+                    }`}
                   onClick={() => handleMenuClick(item.to)}
                 >
                   <i className={`bi ${item.icon} side-menu__icon`}></i>
