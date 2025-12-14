@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,12 +16,12 @@ return new class extends Migration
             $table->string('category');
             $table->integer('quantity');
             $table->decimal('price', 10, 2);
-            $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
             $table->string('stock_status');
             $table->text('description')->nullable();
             $table->string('image_path')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
-        }); 
+        });
     }
 
     /**

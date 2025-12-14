@@ -11,8 +11,12 @@ class DamagedItem extends Model
 
     protected $fillable = [
         'invoice_no',
+        'item_id',
         'item_name',
         'quantity_returned',
+        'item_price',
+        'refund_amount',
+        'return_type',
         'return_reason',
         'other_reason',
         'return_date',
@@ -21,6 +25,14 @@ class DamagedItem extends Model
 
     protected $casts = [
         'return_date' => 'date',
-        'quantity_returned' => 'integer'
+        'quantity_returned' => 'integer',
+        'item_price' => 'decimal:2',
+        'refund_amount' => 'decimal:2',
+        'item_id' => 'integer'
     ];
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'item_id');
+    }
 }

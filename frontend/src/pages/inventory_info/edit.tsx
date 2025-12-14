@@ -2,6 +2,7 @@ import Breadcrumb from "../../components/breadcrums";
 import Header from "../../layouts/header";
 import Sidemenu from "../../layouts/sidemenu";
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface Category {
@@ -62,30 +63,67 @@ const initialInventoryData: InventoryData = {
   image: null,
 };
 
-function Inventory_Registration() {
+function Inventory_Edit() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
   const [inventoryData, setInventoryData] =
     useState<InventoryData>(initialInventoryData);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [existingImagePath, setExistingImagePath] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccessModal, setIsSuccessModal] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const categoriesRes = await axios.get(
-          "http://localhost:8000/api/categories",
-        );
+        // Fetch categories and inventory item in parallel
+        const [categoriesRes, inventoryRes] = await Promise.all([
+          axios.get("http://localhost:8000/api/categories"),
+          axios.get(`http://localhost:8000/api/inventory/${id}`),
+        ]);
+
         setCategories(categoriesRes.data);
+
+        // Pre-populate form with existing data
+        const item = inventoryRes.data;
+        setInventoryData({
+          product_name: item.product_name || "",
+          category: item.category || "",
+          quantity: item.quantity || 0,
+          price: item.price || 0,
+          stock_status: item.stock_status || "",
+          description: item.description || "",
+          is_active: item.is_active !== false,
+          image: null,
+        });
+
+        // Set existing image preview if available
+        if (item.image_path) {
+          setExistingImagePath(item.image_path);
+          setImagePreview(`http://localhost:8000${item.image_path}`);
+        }
+
+        setLoading(false);
       } catch (err) {
         console.error("Error fetching data:", err);
+        setLoading(false);
+        setIsSuccessModal(false);
+        setModalTitle("Error!");
+        setModalMessage("Failed to load inventory item data");
+        setIsModalOpen(true);
       }
     };
 
-    fetchData();
-  }, []);
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
 
   // Get form fields with current categories
   const formFields = getFormFields(categories);
@@ -118,27 +156,74 @@ function Inventory_Registration() {
 
   const handleRemoveImage = () => {
     setImagePreview("");
+    setExistingImagePath("");
     setInventoryData((prevState) => ({ ...prevState, image: null }));
   };
 
   const closeModal = () => {
-    console.log("Closing success/error modal");
     setIsModalOpen(false);
     setModalTitle("");
     setModalMessage("");
+
+    // If it was a success, navigate back to inventory list
+    if (isSuccessModal) {
+      navigate("/inventory");
+    }
+  };
+
+  const handleReset = () => {
+    // Re-fetch the original data
+    const fetchOriginalData = async () => {
+      try {
+        const inventoryRes = await axios.get(
+          `http://localhost:8000/api/inventory/${id}`,
+        );
+        const item = inventoryRes.data;
+        setInventoryData({
+          product_name: item.product_name || "",
+          category: item.category || "",
+          quantity: item.quantity || 0,
+          price: item.price || 0,
+          stock_status: item.stock_status || "",
+          description: item.description || "",
+          is_active: item.is_active !== false,
+          image: null,
+        });
+
+        if (item.image_path) {
+          setExistingImagePath(item.image_path);
+          setImagePreview(`http://localhost:8000${item.image_path}`);
+        } else {
+          setExistingImagePath("");
+          setImagePreview("");
+        }
+      } catch (err) {
+        console.error("Error resetting data:", err);
+      }
+    };
+
+    fetchOriginalData();
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Clear previous modal state
-    closeModal(); // Close success/error modal if open
+    setIsSubmitting(true);
 
     try {
       const formData = new FormData();
+
+      // Add _method field for Laravel to handle as PATCH/PUT
+      formData.append("_method", "PUT");
+
       Object.entries(inventoryData).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
           if (key === "is_active") {
             formData.append(key, value ? "true" : "false");
+          } else if (key === "image") {
+            // Only append image if a new one was selected
+            if (value instanceof File) {
+              formData.append(key, value);
+            }
           } else {
             formData.append(key, value as string | Blob);
           }
@@ -146,7 +231,7 @@ function Inventory_Registration() {
       });
 
       const response = await axios.post(
-        "http://localhost:8000/api/inventory",
+        `http://localhost:8000/api/inventory/${id}`,
         formData,
         {
           headers: {
@@ -155,29 +240,44 @@ function Inventory_Registration() {
         },
       );
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         setIsSuccessModal(true);
         setModalTitle("Success!");
-        setModalMessage("✅ Inventory record added successfully!");
-        setInventoryData(initialInventoryData); // Reset form
-        setImagePreview("");
+        setModalMessage("✅ Inventory record updated successfully!");
+        setIsModalOpen(true);
       }
     } catch (err: any) {
       setIsSuccessModal(false);
       setModalTitle("Error!");
       setModalMessage(
         err.response?.data?.message ||
-        "An error occurred while adding the inventory record",
+        "An error occurred while updating the inventory record",
       );
+      setIsModalOpen(true);
       console.error("Submission error:", err);
     } finally {
-      console.log("Setting success/error modal open state to true", {
-        title: modalTitle,
-        message: modalMessage,
-      });
-      setIsModalOpen(true); // Open success/error modal
+      setIsSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <>
+        <Header onLogout={() => { }} />
+        <Sidemenu onLogout={() => { }} />
+        <div className="main-content app-content">
+          <div className="container-fluid">
+            <div className="flex items-center justify-center h-96">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading inventory item...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -186,12 +286,12 @@ function Inventory_Registration() {
       <div className="main-content app-content">
         <div className="container-fluid">
           <Breadcrumb
-            title="Inventory Registration"
+            title="Edit Inventory Item"
             links={[{ text: "Inventory", link: "/inventory" }]}
-            active="Register New Product"
+            active="Edit Product"
           />
 
-          {/* Original Registration Form Content (restored) */}
+          {/* Edit Form Content */}
           <div className="grid grid-cols-12 gap-x-6">
             <div className="xxl:col-span-12 col-span-12">
               <div className="box overflow-hidden main-content-card">
@@ -328,19 +428,19 @@ function Inventory_Registration() {
                       <button
                         type="button"
                         className="bg-gray-300 px-4 py-2 rounded"
-                        onClick={() => {
-                          setInventoryData(initialInventoryData);
-                          setImagePreview("");
-                        }}
+                        onClick={handleReset}
                       >
                         Reset
                       </button>
                       <button
                         type="submit"
-                        className="bg-green-500 text-white px-4 py-2 rounded"
+                        disabled={isSubmitting}
+                        className={`bg-green-500 text-white px-4 py-2 rounded ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"}`}
                       >
                         <i className="bi bi-save"></i>
-                        <span className="px-3">Submit Record</span>
+                        <span className="px-3">
+                          {isSubmitting ? "Updating..." : "Update Record"}
+                        </span>
                       </button>
                     </div>
                   </form>
@@ -349,7 +449,7 @@ function Inventory_Registration() {
             </div>
           </div>
 
-          {/* Success/Error Modal (kept from previous iteration) */}
+          {/* Success/Error Modal */}
           {isModalOpen && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[9999] flex justify-center items-center">
               <div className="bg-white p-6 rounded-lg shadow-xl w-96">
@@ -366,7 +466,7 @@ function Inventory_Registration() {
                     onClick={closeModal}
                     className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
-                    Close
+                    {isSuccessModal ? "Go to Inventory List" : "Close"}
                   </button>
                 </div>
               </div>
@@ -378,4 +478,4 @@ function Inventory_Registration() {
   );
 }
 
-export default Inventory_Registration;
+export default Inventory_Edit;

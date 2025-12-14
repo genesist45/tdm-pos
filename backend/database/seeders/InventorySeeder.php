@@ -19,7 +19,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Brake Parts',
                 'quantity' => 30,
                 'price' => 2500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'High-quality brake pads for motorcycles',
                 'image_path' => '/images/pos-system/brake_pads.png'
@@ -29,7 +28,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Hoses Parts',
                 'quantity' => 50,
                 'price' => 1000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Durable hoses for various motorcycle parts',
                 'image_path' => '/images/pos-system/hoses.png'
@@ -39,7 +37,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Accessories Parts',
                 'quantity' => 20,
                 'price' => 5500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Premium shock absorbers for smooth rides',
                 'image_path' => '/images/pos-system/shock_absorber.png'
@@ -49,7 +46,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Engine Parts',
                 'quantity' => 40,
                 'price' => 8000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Essential engine spare parts',
                 'image_path' => '/images/pos-system/engine_spare.png'
@@ -59,7 +55,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Engine Parts',
                 'quantity' => 35,
                 'price' => 7500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Performance exhaust system',
                 'image_path' => '/images/pos-system/exhaust_motor.png'
@@ -69,7 +64,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Body Parts',
                 'quantity' => 60,
                 'price' => 1500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Durable side mirrors',
                 'image_path' => '/images/pos-system/motor_sidemirror.png'
@@ -79,7 +73,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 80,
                 'price' => 800,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Loud and clear motorcycle horn',
                 'image_path' => '/images/pos-system/horn.png'
@@ -89,7 +82,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Transmission Parts',
                 'quantity' => 25,
                 'price' => 3000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Reliable kick starter mechanism',
                 'image_path' => '/images/pos-system/kick_starter.png'
@@ -99,7 +91,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Body Parts',
                 'quantity' => 40,
                 'price' => 3500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Sturdy steering bar for better control',
                 'image_path' => '/images/pos-system/steering_bar.png'
@@ -109,7 +100,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 45,
                 'price' => 2800,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Bright LED headlight lamp',
                 'image_path' => '/images/pos-system/heading_light.png'
@@ -119,7 +109,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 50,
                 'price' => 1200,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'LED signal lights for better visibility',
                 'image_path' => '/images/pos-system/signal_light.png'
@@ -129,7 +118,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 30,
                 'price' => 2000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'High-visibility tail lights',
                 'image_path' => '/images/pos-system/tail_light.png'
@@ -139,7 +127,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 35,
                 'price' => 4500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Complete electrical parts set',
                 'image_path' => '/images/pos-system/electrical_parts_motorparts.png'
@@ -149,7 +136,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Accessories Parts',
                 'quantity' => 40,
                 'price' => 1800,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Comfortable and stylish seat cover',
                 'image_path' => '/images/pos-system/seat_cover.png'
@@ -159,7 +145,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Body Parts',
                 'quantity' => 30,
                 'price' => 2500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Protective body cover for motorcycles',
                 'image_path' => '/images/pos-system/motorcycle_body_cover.png'
@@ -169,7 +154,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Transmission Parts',
                 'quantity' => 20,
                 'price' => 1200,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'High-quality bearings for smooth operation',
                 'image_path' => '/images/pos-system/bearing.png'
@@ -179,7 +163,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 60,
                 'price' => 500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Voltage regulator for electrical system',
                 'image_path' => '/images/pos-system/voltage.png'
@@ -189,7 +172,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Transmission Parts',
                 'quantity' => 35,
                 'price' => 3000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Durable sprockets for chain drive',
                 'image_path' => '/images/pos-system/sprockets.png'
@@ -199,7 +181,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Accessories Parts',
                 'quantity' => 40,
                 'price' => 1500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Quality interior tubes for various parts',
                 'image_path' => '/images/pos-system/interior_tube.png'
@@ -209,7 +190,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 50,
                 'price' => 400,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Bright and long-lasting light bulbs',
                 'image_path' => '/images/pos-system/light_bulb.png'
@@ -219,7 +199,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Transmission Parts',
                 'quantity' => 45,
                 'price' => 2500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Heavy-duty motorcycle chain',
                 'image_path' => '/images/pos-system/chain.png'
@@ -229,7 +208,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 25,
                 'price' => 4000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'High-performance motorcycle batteries',
                 'image_path' => '/images/pos-system/batteries.png'
@@ -239,7 +217,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Electrical Parts',
                 'quantity' => 55,
                 'price' => 800,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Quality spark plugs for better ignition',
                 'image_path' => '/images/pos-system/spark_plug.png'
@@ -249,7 +226,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Engine Parts',
                 'quantity' => 30,
                 'price' => 1000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Premium oil seals for engine protection',
                 'image_path' => '/images/pos-system/oil_seals.png'
@@ -259,7 +235,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Engine Parts',
                 'quantity' => 25,
                 'price' => 1200,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'High-quality engine gaskets',
                 'image_path' => '/images/pos-system/gaskets.png'
@@ -269,7 +244,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Engine Parts',
                 'quantity' => 15,
                 'price' => 6500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Performance carburetor for better fuel efficiency',
                 'image_path' => '/images/pos-system/carburetor_motor.png'
@@ -279,7 +253,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Engine Parts',
                 'quantity' => 10,
                 'price' => 8000,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Durable fuel tank with large capacity',
                 'image_path' => '/images/pos-system/fuel_tank.png'
@@ -289,7 +262,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Accessories Parts',
                 'quantity' => 20,
                 'price' => 5500,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Premium shock absorbers for comfort',
                 'image_path' => '/images/pos-system/shock.png'
@@ -299,7 +271,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Accessories Parts',
                 'quantity' => 70,
                 'price' => 900,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'High-quality motorcycle lubricants',
                 'image_path' => '/images/pos-system/lubricants.png'
@@ -309,7 +280,6 @@ class InventorySeeder extends Seeder
                 'category' => 'Brake Parts',
                 'quantity' => 40,
                 'price' => 1300,
-                'supplier_id' => 1,
                 'stock_status' => 'In Stock',
                 'description' => 'Safety brake labels and indicators',
                 'image_path' => '/images/pos-system/brake_labels.png'
