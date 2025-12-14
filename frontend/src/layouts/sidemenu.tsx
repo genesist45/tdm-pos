@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-
 interface SidemenuProps {
   onLogout: () => void;
 }
@@ -44,19 +43,34 @@ function Sidemenu({ onLogout }: SidemenuProps) {
             {[
               { to: "/dashboard", icon: "bi-speedometer", label: "Dashboard" },
               { to: "/pos", icon: "bi-cash-coin", label: "Buy/Purchase" },
-              { to: "/sales", icon: "bi-cart-fill", label: "Transaction History" },
-              { to: "/inventory", icon: "bi-box-seam", label: "Manage Inventory" },
+              {
+                to: "/sales",
+                icon: "bi-cart-fill",
+                label: "Transaction History",
+              },
+              {
+                to: "/inventory",
+                icon: "bi-box-seam",
+                label: "Manage Inventory",
+              },
               { to: "/categories", icon: "bi-tags", label: "Categories" },
-              { to: "/item-damage", icon: "bi-exclamation-triangle", label: "Item Damage" },
-              { to: "/supplier", icon: "bi-truck", label: "Manage Suppliers" },
-              { to: "/sales-report", icon: "bi-bar-chart-line", label: "Sales Report" },
+              {
+                to: "/item-damage",
+                icon: "bi-exclamation-triangle",
+                label: "Item Return",
+              },
+              {
+                to: "/sales-report",
+                icon: "bi-bar-chart-line",
+                label: "Sales Report",
+              },
             ].map((item) => (
               <li key={item.to} className="slide">
                 <Link
                   to={item.to}
                   className={`side-menu__item ${activeMenu === item.to
-                    ? "bg-blue-200 text-blue-700 font-bold"
-                    : "text-gray-700"
+                      ? "bg-blue-200 text-blue-700 font-bold"
+                      : "text-gray-700"
                     }`}
                   onClick={() => handleMenuClick(item.to)}
                 >

@@ -5,7 +5,7 @@ import Breadcrumb from "../../components/breadcrums";
 import Header from "../../layouts/header";
 import Sidemenu from "../../layouts/sidemenu";
 import axios from "axios";
-import { Trash2, X, Plus, Eye, Edit, Upload } from "lucide-react";
+import { Trash2, Plus, Upload } from "lucide-react";
 
 interface Category {
     id: number;
@@ -81,8 +81,8 @@ const Categories_List: React.FC = () => {
                         formatter: (cell) => {
                             const imagePath = cell as string;
                             if (imagePath) {
-                                const imageUrl = imagePath.startsWith('http') 
-                                    ? imagePath 
+                                const imageUrl = imagePath.startsWith('http')
+                                    ? imagePath
                                     : `http://localhost:8000${imagePath}`;
                                 return html(`<img src="${imageUrl}" alt="Category" class="w-12 h-12 object-cover rounded" />`);
                             }
@@ -132,7 +132,7 @@ const Categories_List: React.FC = () => {
                     category.description || 'No description'
                 ]),
             });
-            
+
             gridInstance.current.render(gridRef.current);
 
             // Global functions for grid actions
@@ -153,8 +153,8 @@ const Categories_List: React.FC = () => {
                         description: category.description || ''
                     });
                     if (category.image_path) {
-                        setImagePreview(category.image_path.startsWith('http') 
-                            ? category.image_path 
+                        setImagePreview(category.image_path.startsWith('http')
+                            ? category.image_path
                             : `http://localhost:8000${category.image_path}`);
                     } else {
                         setImagePreview('');
@@ -325,24 +325,20 @@ const Categories_List: React.FC = () => {
             <div className="main-content app-content">
                 {/* Notification */}
                 {notification.show && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10001]">
-                        <div className={`bg-white rounded-lg p-6 shadow-xl ${notification.type === 'success' ? 'border-2 border-green-500' : 'border-2 border-red-500'}`}>
-                            <div className="flex items-center justify-center mb-4">
+                    <div className="fixed top-4 right-4 z-[10001] animate-fade-in-down">
+                        <div className={`bg-white rounded-lg p-4 shadow-xl border-l-4 ${notification.type === 'success' ? 'border-green-500' : 'border-red-500'} flex items-center gap-3`}>
+                            <div className={`p-2 rounded-full ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'}`}>
                                 {notification.type === 'success' ? (
-                                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    </div>
+                                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
                                 ) : (
-                                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </div>
+                                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
                                 )}
                             </div>
-                            <p className={`text-center text-lg font-medium ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                            <p className={`font-medium ${notification.type === 'success' ? 'text-green-800' : 'text-red-800'}`}>
                                 {notification.message}
                             </p>
                         </div>
@@ -384,11 +380,8 @@ const Categories_List: React.FC = () => {
             {isAddModalOpen && (
                 <div style={modalOverlayStyle} onClick={() => setIsAddModalOpen(false)}>
                     <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="mb-4">
                             <h2 className="text-xl font-bold text-gray-800">Add New Category</h2>
-                            <button onClick={() => setIsAddModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                <X size={24} />
-                            </button>
                         </div>
                         <form onSubmit={handleAddCategory}>
                             {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}
@@ -441,18 +434,15 @@ const Categories_List: React.FC = () => {
             {isViewModalOpen && selectedCategory && (
                 <div style={modalOverlayStyle} onClick={() => setIsViewModalOpen(false)}>
                     <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="mb-4">
                             <h2 className="text-xl font-bold text-gray-800">Category Details</h2>
-                            <button onClick={() => setIsViewModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                <X size={24} />
-                            </button>
                         </div>
                         <div className="space-y-4">
                             {selectedCategory.image_path && (
                                 <div className="flex justify-center">
-                                    <img 
-                                        src={getImageUrl(selectedCategory.image_path)} 
-                                        alt={selectedCategory.name} 
+                                    <img
+                                        src={getImageUrl(selectedCategory.image_path)}
+                                        alt={selectedCategory.name}
                                         className="max-w-full h-48 object-cover rounded-lg"
                                     />
                                 </div>
@@ -479,11 +469,8 @@ const Categories_List: React.FC = () => {
             {isEditModalOpen && selectedCategory && (
                 <div style={modalOverlayStyle} onClick={() => setIsEditModalOpen(false)}>
                     <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="mb-4">
                             <h2 className="text-xl font-bold text-gray-800">Edit Category</h2>
-                            <button onClick={() => setIsEditModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                <X size={24} />
-                            </button>
                         </div>
                         <form onSubmit={handleUpdateCategory}>
                             {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}

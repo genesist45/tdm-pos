@@ -16,14 +16,15 @@ class Inventory extends Model
         'category',
         'quantity',
         'price',
-        'supplier_id',
         'stock_status',
         'description',
-        'image_path'
+        'image_path',
+        'is_active'
     ];
 
-    public function supplier()
-    {
-        return $this->belongsTo(Supplier::class);
-    }
+    protected $casts = [
+        'is_active' => 'boolean',
+        'price' => 'decimal:2',
+        'quantity' => 'integer',
+    ];
 }
