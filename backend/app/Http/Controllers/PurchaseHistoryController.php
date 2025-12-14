@@ -23,7 +23,7 @@ class PurchaseHistoryController extends Controller
                 'quantity' => null,
                 'total_amount' => $purchase->total_amount,
                 'amount_received' => $purchase->amount_received,
-                'change' => $purchase->change,
+                'change' => max(0, $purchase->amount_received - $purchase->total_amount),
                 'reason' => null,
                 'processed_by' => null,
                 'created_at' => $purchase->created_at
@@ -135,7 +135,7 @@ class PurchaseHistoryController extends Controller
             'items' => $itemsWithDetails,
             'total_amount' => $purchase->total_amount,
             'amount_received' => $purchase->amount_received,
-            'change' => $purchase->change,
+            'change' => max(0, $purchase->amount_received - $purchase->total_amount),
             'created_at' => $purchase->created_at
         ]);
     }

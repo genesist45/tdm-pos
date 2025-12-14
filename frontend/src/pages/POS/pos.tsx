@@ -21,12 +21,6 @@ interface CartItem extends Product {
   quantity: number;
 }
 
-interface PurchaseItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-}
 
 interface Purchase {
   id: string;
@@ -199,20 +193,19 @@ const SidebarCartItem: React.FC<SidebarCartItemProps> = ({
 );
 
 // Function to detect if dark mode is active (example using body class)
-const isDarkModeActive = () => document.body.classList.contains("dark-mode");
 
 function PointOfSale() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [total, setTotal] = useState<number>(0);
-  const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
+  const [, setTotal] = useState<number>(0);
+  const [, setPurchaseHistory] = useState<Purchase[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [amountReceived, setAmountReceived] = useState<string>("");
-  const [change, setChange] = useState<number>(0);
+
   const productListRef = useRef<HTMLDivElement>(null);
   const [outOfStockNotification, setOutOfStockNotification] = useState<
     string[]
@@ -357,7 +350,7 @@ function PointOfSale() {
           })),
           total_amount: totalAmount,
           amount_received: parseFloat(amountReceived),
-          change: change,
+          change: changeAmount,
         };
 
         console.log("Sending purchase data:", purchaseData);
@@ -490,8 +483,6 @@ function PointOfSale() {
   const totalAmount = afterDiscount + taxAmount;
   const changeAmount =
     amountReceived !== "" ? Number(amountReceived) - totalAmount : 0;
-  const isValidChange =
-    amountReceived !== "" && Number(amountReceived) >= totalAmount;
   // --- End Checkout Summary Calculations ---
 
   const handleAmountReceivedChange = (
@@ -566,7 +557,6 @@ function PointOfSale() {
   };
 
   // Function to detect if dark mode is active (example using body class)
-  const isDarkModeActive = () => document.body.classList.contains("dark-mode");
 
   return (
     <>
@@ -649,8 +639,8 @@ function PointOfSale() {
                   <button
                     key={category.id}
                     className={`bg-white border-2 rounded-lg shadow-lg p-2 sm:p-4 text-center cursor-pointer text-black ${selectedCategory === category.name
-                        ? "border-blue-500 ring-2 ring-blue-200"
-                        : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 ring-2 ring-blue-200"
+                      : "border-gray-200 hover:border-gray-300"
                       }`}
                     onClick={() => handleCategoryClick(category.name)}
                   >
