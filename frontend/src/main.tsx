@@ -21,6 +21,9 @@ import Inventory_Registration from './pages/inventory_info/register.tsx';
 // Categories Page
 import Categories_List from './pages/categories/list.tsx';
 
+// Item Damage Page
+import ItemDamage_List from './pages/item_damage/list.tsx';
+
 // Financial Pages (To be added later)
 
 // Import SalesReport
@@ -66,6 +69,9 @@ createRoot(document.getElementById('root')!).render(
 
         {/* Sales Report Route (Protected) */}
         <Route path="/sales-report" element={isAuthenticated() ? <SalesReport /> : <Navigate to="/admin" />} />
+
+        {/* Item Damage Route (Protected) */}
+        <Route path="/item-damage" element={isAuthenticated() ? <ItemDamage_List /> : <Navigate to="/admin" />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

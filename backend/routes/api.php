@@ -6,6 +6,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PurchaseHistoryController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DamagedItemController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,3 +37,6 @@ Route::get('/purchase-history', [PurchaseHistoryController::class, 'index']);
 Route::post('/purchase-history', [PurchaseHistoryController::class, 'store']);
 Route::get('/purchase-history/{id}', [PurchaseHistoryController::class, 'show']);
 Route::delete('/purchase-history/{id}', [PurchaseHistoryController::class, 'destroy']);
+
+// Damaged Items Routes
+Route::apiResource('damaged-items', DamagedItemController::class);

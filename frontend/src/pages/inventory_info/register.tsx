@@ -10,6 +10,13 @@ interface Supplier {
   supplier_name: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  description: string | null;
+  image_path: string | null;
+}
+
 interface InventoryData {
   product_name: string;
   category: string;
@@ -28,21 +35,14 @@ type FormField = {
   options?: { value: string | number; label: string }[];
 };
 
-const formFields: FormField[] = [
+// Form fields configuration - will be populated dynamically
+const getFormFields = (categories: Category[], suppliers: Supplier[]): FormField[] => [
   { label: "Product Name", name: "product_name", type: "text" },
   {
     label: "Category",
     name: "category",
     type: "select",
-    options: [
-      "Brake Parts",
-      "Hoses Parts",
-      "Electrical Parts",
-      "Engine Parts",
-      "Body Parts",
-      "Transmission Parts",
-      "Accessories Parts"
-    ].map(cat => ({ value: cat, label: cat }))
+    options: categories.map(cat => ({ value: cat.name, label: cat.name }))
   },
   { label: "Quantity", name: "quantity", type: "number" },
   { label: "Price", name: "price", type: "number" },
@@ -50,7 +50,10 @@ const formFields: FormField[] = [
     label: "Supplier",
     name: "supplier_id",
     type: "select",
-    options: [] // Will be populated from API
+    options: suppliers.map(supplier => ({
+      value: supplier.id,
+      label: `${supplier.company_name} (${supplier.supplier_name})`
+    }))
   },
   {
     label: "Stock Status",
@@ -79,28 +82,28 @@ function Inventory_Registration() {
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccessModal, setIsSuccessModal] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    const fetchSuppliers = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/suppliers');
-        setSuppliers(response.data);
-        // Update the supplier options in formFields
-        const supplierField = formFields.find(field => field.name === 'supplier_id');
-        if (supplierField) {
-          supplierField.options = response.data.map((supplier: Supplier) => ({
-            value: supplier.id,
-            label: `${supplier.company_name} (${supplier.supplier_name})`
-          }));
-        }
+        // Fetch suppliers and categories in parallel
+        const [suppliersRes, categoriesRes] = await Promise.all([
+          axios.get('http://localhost:8000/api/suppliers'),
+          axios.get('http://localhost:8000/api/categories')
+        ]);
+        setSuppliers(suppliersRes.data);
+        setCategories(categoriesRes.data);
       } catch (err) {
-        console.error('Error fetching suppliers:', err);
+        console.error('Error fetching data:', err);
       }
     };
 
-    fetchSuppliers();
-
+    fetchData();
   }, []);
+
+  // Get form fields with current categories and suppliers
+  const formFields = getFormFields(categories, suppliers);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
