@@ -14,12 +14,12 @@ interface SalesData {
 }
 
 const motorPartsCategories = [
-    { name: "Engine Parts",  icon: <MdBuild size={32} /> },
-    { name: "Brake Parts",  icon: <MdSpeed size={32} /> },
-    { name: "Electrical Parts",  icon: <MdElectricBolt size={32} /> },
-    { name: "Body Parts",  icon: <MdDirectionsCar size={32} /> },
-    { name: "Transmission Parts",  icon: <MdSettings size={32} /> },
-    { name: "Accessories",  icon: <MdShoppingCart size={32} /> },
+    { name: "Engine Parts", icon: <MdBuild size={32} /> },
+    { name: "Brake Parts", icon: <MdSpeed size={32} /> },
+    { name: "Electrical Parts", icon: <MdElectricBolt size={32} /> },
+    { name: "Body Parts", icon: <MdDirectionsCar size={32} /> },
+    { name: "Transmission Parts", icon: <MdSettings size={32} /> },
+    { name: "Accessories", icon: <MdShoppingCart size={32} /> },
 ];
 
 function Dashboard() {
@@ -39,24 +39,33 @@ function Dashboard() {
 
         const fetchSalesData = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/purchase-history');
-                const purchaseHistory = response.data;
+                // Fetch purchase history
+                const purchaseResponse = await axios.get('http://localhost:8000/api/purchase-history');
+                const purchaseHistory = purchaseResponse.data;
 
-                // Calculate total sales
-                const total = purchaseHistory.reduce((sum: number, purchase: any) => sum + parseFloat(purchase.total_amount), 0);
-                setTotalSales(total);
+                // Fetch total refunds from damaged items
+                const refundsResponse = await axios.get('http://localhost:8000/api/damaged-items-refunds');
+                const totalRefunds = parseFloat(refundsResponse.data.total_refunds) || 0;
+
+                // Calculate total sales (purchases only, not damage returns)
+                const purchases = purchaseHistory.filter((item: any) => item.type === 'purchase');
+                const grossSales = purchases.reduce((sum: number, purchase: any) => sum + parseFloat(purchase.total_amount), 0);
+
+                // Net sales = Gross sales - Refunds
+                const netSales = grossSales - totalRefunds;
+                setTotalSales(netSales);
 
                 // Process data for sales trend
                 const monthlySales: { [key: string]: number } = {};
-                
+
                 // Initialize all months with 0
                 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 months.forEach(month => {
                     monthlySales[month] = 0;
                 });
 
-                // Aggregate sales by month
-                purchaseHistory.forEach((purchase: any) => {
+                // Aggregate sales by month (purchases only)
+                purchases.forEach((purchase: any) => {
                     const date = new Date(purchase.created_at);
                     const month = months[date.getMonth()];
                     monthlySales[month] += parseFloat(purchase.total_amount);
@@ -83,7 +92,7 @@ function Dashboard() {
                         'Authorization': `Bearer ${adminToken}`
                     }
                 });
-                
+
                 if (!response.data || !Array.isArray(response.data)) {
                     throw new Error('Invalid response format from inventory API');
                 }
@@ -92,7 +101,7 @@ function Dashboard() {
                     const quantity = parseInt(item.quantity) || 0;
                     return sum + quantity;
                 }, 0);
-                
+
                 setTotalInventory(inventory);
             } catch (err: any) {
                 console.error('Error fetching total inventory:', err);
@@ -127,9 +136,8 @@ function Dashboard() {
                                 {motorPartsCategories.map((category, index) => (
                                     <div
                                         key={index}
-                                        className={`bg-white p-3 rounded-md shadow-sm flex flex-col items-center hover:shadow-md transition-all ${
-                                            index < 3 ? 'mb-6 md:mb-0' : ''
-                                        }`}
+                                        className={`bg-white p-3 rounded-md shadow-sm flex flex-col items-center hover:shadow-md transition-all ${index < 3 ? 'mb-6 md:mb-0' : ''
+                                            }`}
                                     >
                                         {category.icon}
                                         <h3 className="text-sm font-semibold mt-1 text-gray-800 dark:text-white">{category.name}</h3>
@@ -164,15 +172,15 @@ function Dashboard() {
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="name" />
                                     <YAxis tickFormatter={(value) => `₱${value}`} />
-                                    <Tooltip 
+                                    <Tooltip
                                         formatter={(value: number) => [`₱${value.toFixed(2)}`, 'Sales']}
                                         labelFormatter={(label) => `Month: ${label}`}
                                     />
                                     <Legend />
-                                    <Line 
-                                        type="monotone" 
-                                        dataKey="sales" 
-                                        stroke="#8884d8" 
+                                    <Line
+                                        type="monotone"
+                                        dataKey="sales"
+                                        stroke="#8884d8"
                                         strokeWidth={2}
                                         name="Monthly Sales"
                                     />

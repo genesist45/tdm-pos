@@ -5,28 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Inventory extends Model
+class Category extends Model
 {
     use HasFactory;
 
-    protected $table = 'inventory';
-
     protected $fillable = [
-        'product_name',
-        'category',
-        'quantity',
-        'price',
-        'stock_status',
-        'description',
+        'name',
         'image_path',
-        'is_active'
+        'description'
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-        'price' => 'decimal:2',
-        'quantity' => 'integer',
-    ];
+    /**
+     * Get the inventory items for this category.
+     */
+    public function inventoryItems()
+    {
+        return $this->hasMany(Inventory::class, 'category', 'name');
+    }
 
     protected $appends = ['image_url'];
 

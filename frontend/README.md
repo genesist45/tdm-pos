@@ -1,50 +1,70 @@
-# React + TypeScript + Vite
+# Troy-Dean MotorParts - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend application for the POS Management System of Troy-Dean MotorParts, built with React and Vite.
 
-Currently, two official plugins are available:
+## 📋 Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Before you begin, ensure you have the following installed on your machine:
 
-## Expanding the ESLint configuration
+- **Node.js** (Version 16 or higher recommended)
+- **npm** (Node Package Manager)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## 🛠️ Installation
 
-- Configure the top-level `parserOptions` property like this:
+Follow these steps to install the project dependencies:
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+1.  **Navigate to the frontend directory:**
+    ```bash
+    cd frontend
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+    This command downloads all the necessary libraries and packages listed in `package.json`.
+
+## ⚙️ Setup & Configuration
+
+Once installed, you can run the application locally:
+
+1.  **Start the development server:**
+    ```bash
+    npm run dev
+    ```
+
+2.  **Access the application:**
+    Open your browser and navigate to the URL shown in the terminal, typically:
+    > http://localhost:5173
+
+3.  **Build for production (optional):**
+    To create a production-ready build, run:
+    ```bash
+    npm run build
+    ```
+
+## 📂 Project Structure
+
+Here is an overview of the frontend folder structure to help you get oriented:
+
+```
+frontend/
+├── node_modules/       # Installed dependencies (do not edit)
+├── public/             # Static public assets
+├── src/                # Main source code
+│   ├── assets/         # Images, fonts, and global styles
+│   ├── components/     # Reusable UI components (buttons, inputs, etc.)
+│   ├── layouts/        # Page layouts (headers, sidebars)
+│   ├── pages/          # Application pages (Dashboard, Inventory, POS, etc.)
+│   ├── App.tsx         # Main application component
+│   └── main.tsx        # Entry point of the application
+├── package.json        # Project metadata and dependency list
+├── vite.config.ts      # Vite configuration settings
+└── README.md           # Project documentation
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Key Directories:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+-   **`src/pages`**: Contains the code for individual pages like `AdminLogin`, `Dashboard`, and `Inventory`.
+-   **`src/components`**: Smaller, reusable parts of the interface mostly used across different pages.
+-   **`src/layouts`**: Defines the common structure of pages, such as the navigation bar and side menu.

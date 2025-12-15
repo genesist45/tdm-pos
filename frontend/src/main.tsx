@@ -1,34 +1,37 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import './assets/css/style.css';
-import Dashboard from './pages/dashboard.tsx';
-import AdminLoginPage from './pages/AdminLogin.tsx';
-import PointOfSale from './pages/POS/pos.tsx'; 
+import "./assets/css/style.css";
+import Dashboard from "./pages/dashboard.tsx";
+import AdminLoginPage from "./pages/AdminLogin.tsx";
+import AdminRoute from "./components/AdminRoute.tsx";
+import PointOfSale from "./pages/POS/pos.tsx";
 
-// Purchase Pages
-import Sales_List from './pages/purchase_history/list.tsx';
-
-// Supplier Pages
-import Supplier_List from './pages/supplier/list.tsx';
-import Supplier_Registration from './pages/supplier/registration.tsx';
+// Transaction History Page
+import Transaction_History from "./pages/purchase_history/list.tsx";
 
 // Inventory Pages
-import Inventory_List from './pages/inventory_info/list.tsx';
-import Inventory_Registration from './pages/inventory_info/register.tsx';
+import Inventory_List from "./pages/inventory_info/list.tsx";
+import Inventory_Registration from "./pages/inventory_info/register.tsx";
+import Inventory_Edit from "./pages/inventory_info/edit.tsx";
+
+// Categories Page
+import Categories_List from "./pages/categories/list.tsx";
+
+// Item Damage Pages
+import ItemDamage_List from "./pages/item_damage/list.tsx";
+import ItemDamage_Add from "./pages/item_damage/add.tsx";
+import ItemDamage_Edit from "./pages/item_damage/edit.tsx";
 
 // Financial Pages (To be added later)
 
 // Import SalesReport
-import SalesReport from './pages/SalesReport/SalesReport.tsx'; 
+import SalesReport from "./pages/SalesReport/SalesReport.tsx";
 
-// Function to check if the user is authenticated
-const isAuthenticated = () => {
-  return localStorage.getItem("adminToken") !== null;
-};
 
-createRoot(document.getElementById('root')!).render(
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
@@ -38,28 +41,33 @@ createRoot(document.getElementById('root')!).render(
         {/* Admin Login Route */}
         <Route path="/admin" element={<AdminLoginPage />} />
 
-        {/* Dashboard (Protected) */}
-        <Route
-          path="/dashboard"
-          element={isAuthenticated() ? <Dashboard /> : <Navigate to="/admin" />}
-        />
+        {/* Protected Routes */}
+        <Route element={<AdminRoute />}>
+          {/* Dashboard */}
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Sales Routes (Protected) */}
-        <Route path="/sales" element={isAuthenticated() ? <Sales_List /> : <Navigate to="/admin" />} />
+          {/* Transaction History */}
+          <Route path="/sales" element={<Transaction_History />} />
 
-        {/* Supplier Routes (Protected) */}
-        <Route path="/supplier" element={isAuthenticated() ? <Supplier_List /> : <Navigate to="/admin" />} />
-        <Route path="/supplier/create" element={isAuthenticated() ? <Supplier_Registration /> : <Navigate to="/admin" />} />
+          {/* Inventory Routes */}
+          <Route path="/inventory" element={<Inventory_List />} />
+          <Route path="/inventory/create" element={<Inventory_Registration />} />
+          <Route path="/inventory/edit/:id" element={<Inventory_Edit />} />
 
-        {/* Inventory Routes (Protected) */}
-        <Route path="/inventory" element={isAuthenticated() ? <Inventory_List /> : <Navigate to="/admin" />} />
-        <Route path="/inventory/create" element={isAuthenticated() ? <Inventory_Registration /> : <Navigate to="/admin" />} />
+          {/* Categories Route */}
+          <Route path="/categories" element={<Categories_List />} />
 
-        {/* POS Route (Protected) */}
-        <Route path="/pos" element={isAuthenticated() ? <PointOfSale /> : <Navigate to="/admin" />} />
+          {/* POS Route */}
+          <Route path="/pos" element={<PointOfSale />} />
 
-        {/* Sales Report Route (Protected) */}
-        <Route path="/sales-report" element={isAuthenticated() ? <SalesReport /> : <Navigate to="/admin" />} />
+          {/* Sales Report Route */}
+          <Route path="/sales-report" element={<SalesReport />} />
+
+          {/* Item Damage Routes */}
+          <Route path="/item-damage" element={<ItemDamage_List />} />
+          <Route path="/item-damage/add" element={<ItemDamage_Add />} />
+          <Route path="/item-damage/edit/:id" element={<ItemDamage_Edit />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>,
