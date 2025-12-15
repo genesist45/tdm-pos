@@ -27,4 +27,11 @@ class Inventory extends Model
         'price' => 'decimal:2',
         'quantity' => 'integer',
     ];
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image_path ? url($this->image_path) : null;
+    }
 }
