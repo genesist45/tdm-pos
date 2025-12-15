@@ -22,4 +22,11 @@ class Category extends Model
     {
         return $this->hasMany(Inventory::class, 'category', 'name');
     }
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image_path ? url($this->image_path) : null;
+    }
 }
