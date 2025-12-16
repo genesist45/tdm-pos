@@ -9,6 +9,19 @@ Before you begin, ensure you have the following installed on your machine:
 - **Node.js** (Version 16 or higher recommended)
 - **npm** (Node Package Manager)
 
+---
+
+## 🔧 Tools and Technologies
+
+| Component | Tools / Languages | Description |
+|-----------|-------------------|-------------|
+| Front-end | React, TypeScript, Vite, CSS | User interface |
+| Back-end | PHP, Laravel | Server-side logic |
+| Database | MySQL | Data storage |
+| Others | VS Code, Git, npm, Composer | Design and development |
+
+---
+
 ## 🛠️ Installation
 
 Follow these steps to install the project dependencies:
